@@ -2,6 +2,8 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { supabase } from './lib/supabase'
 
+const QUADRA_DEPOSIT_ADDRESS = '0xe801e50631c03a1aaf2d30bb1f2f196864db58a5'
+
 type AuthMode = 'home' | 'login' | 'signup' | 'forgot'
 type Tab = 'overview' | 'play' | 'wallet' | 'activity' | 'referrals' | 'profile' | 'admin'
 
@@ -18,6 +20,7 @@ type Deposit = {
   id: string
   user_id: string
   amount: number
+  network: string | null
   payment_reference: string | null
   status: string
   admin_note: string | null
@@ -70,6 +73,8 @@ function App() {
 
   const [depositAmount, setDepositAmount] = useState('')
   const [depositReference, setDepositReference] = useState('')
+  const [depositNetwork, setDepositNetwork] = useState('Ethereum (ERC20)')
+  const [depositCopyMessage, setDepositCopyMessage] = useState('')
   const [withdrawalAmount, setWithdrawalAmount] = useState('')
   const [withdrawalAddress, setWithdrawalAddress] = useState('')
   const [walletActionLoading, setWalletActionLoading] = useState(false)
@@ -138,7 +143,7 @@ function App() {
       const [depositResult, withdrawalResult, userResult] = await Promise.all([
         supabase
           .from('deposit_requests')
-          .select('id,user_id,amount,payment_reference,status,admin_note,created_at')
+          .select('id,user_id,amount,network,payment_reference,status,admin_note,created_at')
           .order('created_at', { ascending: false })
           .limit(100),
 
@@ -302,6 +307,15 @@ function App() {
     }
   }
 
+  const copyDepositAddress = async () => {
+    try {
+      await navigator.clipboard.writeText(QUADRA_DEPOSIT_ADDRESS)
+      setDepositCopyMessage('Address copied successfully.')
+    } catch {
+      setDepositCopyMessage('Unable to copy automatically. Please select and copy the address.')
+    }
+  }
+
   const submitDeposit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setWalletActionLoading(true)
@@ -312,14 +326,22 @@ function App() {
       if (!Number.isFinite(amount) || amount <= 0) {
         throw new Error('Enter a valid deposit amount.')
       }
-      if (!depositReference.trim()) {
-        throw new Error('Enter your transaction reference or hash.')
+
+      const hash = depositReference.trim()
+
+      if (!/^0x[a-fA-F0-9]{64}$/.test(hash)) {
+        throw new Error('Enter a valid EVM transaction hash beginning with 0x and containing 64 hexadecimal characters.')
+      }
+
+      if (!['Ethereum (ERC20)', 'BNB Smart Chain (BEP20)'].includes(depositNetwork)) {
+        throw new Error('Select a supported deposit network.')
       }
 
       const { error } = await supabase.from('deposit_requests').insert({
         user_id: userId,
         amount,
-        payment_reference: depositReference.trim(),
+        network: depositNetwork,
+        payment_reference: hash,
         status: 'pending'
       })
 
@@ -534,7 +556,8 @@ function App() {
                     <div>
                       <strong>{money(item.amount)} · {item.status.toUpperCase()}</strong>
                       <p>User: {item.user_id}</p>
-                      <p>Reference: {item.payment_reference || 'Not provided'}</p>
+                      <p>Network: {item.network || 'Not provided'}</p>
+                      <p>Transaction hash: {item.payment_reference || 'Not provided'}</p>
                       <small>{new Date(item.created_at).toLocaleString()}</small>
                       {item.admin_note && <p>Admin note: {item.admin_note}</p>}
                     </div>
@@ -642,13 +665,56 @@ function App() {
 
               <div className="admin-section">
                 <h2>Submit a deposit</h2>
-                <p>After sending USDT to the official QUADRA deposit address, submit the amount and transaction hash. Do not submit until your transfer is complete.</p>
+                <p>Send USDT to the QUADRA address below using the selected network. Submit the request only after the transfer is complete.</p>
+
                 <form onSubmit={submitDeposit}>
-                  <label>Amount in USD</label>
-                  <input type="number" min="0.01" step="0.01" value={depositAmount} onChange={e => setDepositAmount(e.target.value)} required />
-                  <label>TRON transaction hash / reference</label>
-                  <input value={depositReference} onChange={e => setDepositReference(e.target.value)} required />
-                  <button className="primary-button" disabled={walletActionLoading}>Submit deposit request</button>
+                  <label htmlFor="deposit-network">Choose deposit network</label>
+                  <select
+                    id="deposit-network"
+                    value={depositNetwork}
+                    onChange={e => setDepositNetwork(e.target.value)}
+                    required
+                  >
+                    <option value="Ethereum (ERC20)">Ethereum (ERC20)</option>
+                    <option value="BNB Smart Chain (BEP20)">BNB Smart Chain (BEP20)</option>
+                  </select>
+
+                  <label>Official QUADRA USDT deposit address</label>
+                  <div className="profile-detail">
+                    <strong style={{ overflowWrap: 'anywhere' }}>{QUADRA_DEPOSIT_ADDRESS}</strong>
+                    <button type="button" className="login-button" onClick={copyDepositAddress}>
+                      Copy address
+                    </button>
+                  </div>
+                  {depositCopyMessage && <p role="status">{depositCopyMessage}</p>}
+
+                  <div className="notice">
+                    Important: Use only the network selected above. Ethereum ERC20 and BNB Smart Chain BEP20 are different networks. Sending funds through the wrong network may result in loss of funds.
+                  </div>
+
+                  <label htmlFor="deposit-amount">Amount in USD</label>
+                  <input
+                    id="deposit-amount"
+                    type="number"
+                    min="0.01"
+                    step="0.01"
+                    value={depositAmount}
+                    onChange={e => setDepositAmount(e.target.value)}
+                    required
+                  />
+
+                  <label htmlFor="deposit-hash">Transaction hash</label>
+                  <input
+                    id="deposit-hash"
+                    value={depositReference}
+                    onChange={e => setDepositReference(e.target.value)}
+                    placeholder="0x..."
+                    required
+                  />
+
+                  <button className="primary-button" disabled={walletActionLoading}>
+                    {walletActionLoading ? 'Submitting...' : 'Submit deposit request'}
+                  </button>
                 </form>
               </div>
 
