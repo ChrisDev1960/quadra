@@ -1,16 +1,24 @@
 
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { supabase } from './lib/supabase'
 
 type AuthMode = 'home' | 'login' | 'signup' | 'forgot'
 
 function App() {
   const [mode, setMode] = useState<AuthMode>('home')
+  const [darkMode, setDarkMode] = useState(
+    () => localStorage.getItem('quadra-theme') === 'dark'
+  )
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = darkMode ? 'dark' : 'light'
+    localStorage.setItem('quadra-theme', darkMode ? 'dark' : 'light')
+  }, [darkMode])
 
   const resetForm = (nextMode: AuthMode) => {
     setMode(nextMode)
@@ -100,9 +108,17 @@ function App() {
         </nav>
 
         <div className="nav-actions">
+          <button
+            className="login-button"
+            onClick={() => setDarkMode(!darkMode)}
+          >
+            {darkMode ? '☀ Light mode' : '☾ Dark mode'}
+          </button>
+
           <button className="login-button" onClick={() => resetForm('login')}>
             Log in
           </button>
+
           <button className="nav-button" onClick={() => resetForm('signup')}>
             Create account <span>↗</span>
           </button>
