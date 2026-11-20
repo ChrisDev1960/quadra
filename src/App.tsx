@@ -124,18 +124,33 @@ const [selectedPracticeTile, setSelectedPracticeTile] = useState<number | null>(
   const [loading, setLoading] = useState(false)
 
   const loadPracticeBalance = async () => {
-  const { data, error } = await supabase
-    .from('mines_practice_wallets')
-    .select('balance')
-    .eq('user_id', userId)
-    .maybeSingle()
+  setPracticeMessage('Loading practice balance...')
 
-  if (error) {
-    setPracticeMessage(error.message)
+  const { data: authData, error: authError } = await supabase.auth.getUser()
+
+  if (authError || !authData.user) {
+    setPracticeMessage('Unable to identify your account. Please sign in again.')
     return
   }
 
-  setPracticeBalance(Number(data?.balance ?? 100))
+  const { data, error } = await supabase
+    .from('mines_practice_wallets')
+    .select('balance')
+    .eq('user_id', authData.user.id)
+    .maybeSingle()
+
+  if (error) {
+    setPracticeMessage(`Balance loading failed: ${error.message}`)
+    return
+  }
+
+  if (!data) {
+    setPracticeMessage('Practice wallet not found for this account.')
+    return
+  }
+
+  setPracticeBalance(Number(data.balance))
+  setPracticeMessage('')
 }
 
 const startPracticeRound = async () => {
