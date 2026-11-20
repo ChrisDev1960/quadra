@@ -830,7 +830,77 @@ const selectPracticeTile = async (tile: number) => {
   </section>
 )}
 
+{tab === 'wallet' && walletPage === 'main' && (
+  <section className="dashboard-panel">
+    <span className="section-label">YOUR QUADRA WALLET</span>
+    <h2>Wallet.</h2>
+    <p>Your USD account balance and financial activity.</p>
 
+    {walletLoading && (
+      <div className="notice">Loading wallet...</div>
+    )}
+
+    {walletMessage && (
+      <div className="notice" role="status">{walletMessage}</div>
+    )}
+
+    <div className="control-summary">
+      <span>AVAILABLE BALANCE</span>
+      <strong>{money(balance)}</strong>
+      <small>{currency}</small>
+    </div>
+
+    <div className="wallet-actions">
+      <button
+        className="primary-button"
+        onClick={() => openWalletPage('deposit')}
+      >
+        Deposit
+      </button>
+
+      <button
+        className="secondary-button"
+        onClick={() => openWalletPage('withdraw')}
+      >
+        Withdraw
+      </button>
+    </div>
+
+    <div className="admin-section">
+      <span className="section-label">RECENT TRANSACTIONS</span>
+      <h2>Wallet activity.</h2>
+
+      {transactions.length === 0 ? (
+        <div className="empty-state">
+          <span>—</span>
+          <strong>No transactions yet</strong>
+          <p>Your wallet transactions will appear here.</p>
+        </div>
+      ) : (
+        transactions.map(transaction => (
+          <div className="profile-detail" key={transaction.id}>
+            <div>
+              <strong>{transaction.type.replace('_', ' ')}</strong>
+              <p>{transaction.description || transaction.status}</p>
+              <small>
+                {new Date(transaction.created_at).toLocaleString()}
+              </small>
+            </div>
+            <strong>{money(transaction.amount)}</strong>
+          </div>
+        ))
+      )}
+    </div>
+
+    <button
+      className="secondary-button"
+      onClick={() => loadAccountData(userId)}
+      disabled={walletLoading}
+    >
+      Refresh wallet
+    </button>
+  </section>
+)}
           {tab === 'wallet' && walletPage === 'deposit' && (
             <section className="dashboard-panel">
               <button className="text-action" onClick={() => openWalletPage('main')}>Back to Wallet</button>
