@@ -759,10 +759,11 @@ const selectPracticeTile = async (tile: number) => {
       </>
     )}
 
-    {practiceMessage && !practiceResult && !practiceRoundId && (
-      <div className="notice" role="status">{practiceMessage}</div>
-    )}
-
+   {!practiceResult && !practiceRoundId && (
+  <div className="notice" role="status">
+    {practiceMessage || 'Practice balance is waiting to load.'}
+  </div>
+)}
     <div className="notice">
       Practice mode uses virtual credits only. It does not use your real wallet, accept deposits or generate withdrawable winnings.
     </div>
