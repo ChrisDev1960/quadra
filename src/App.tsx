@@ -108,12 +108,97 @@ function App() {
     }
   })
   const [autoSettingsMessage, setAutoSettingsMessage] = useState('')
+  const [practiceBalance, setPracticeBalance] = useState(100)
+const [practiceStake, setPracticeStake] = useState('1.00')
+const [practiceRoundId, setPracticeRoundId] = useState('')
+const [practiceBusy, setPracticeBusy] = useState(false)
+const [practiceMessage, setPracticeMessage] = useState('')
+const [practiceResult, setPracticeResult] = useState<'won' | 'lost' | ''>('')
+const [practicePayout, setPracticePayout] = useState(0)
+const [selectedPracticeTile, setSelectedPracticeTile] = useState<number | null>(null)
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
+
+  const loadPracticeBalance = async () => {
+  const { data, error } = await supabase
+    .from('mines_practice_wallets')
+    .select('balance')
+    .eq('user_id', userId)
+    .maybeSingle()
+
+  if (error) {
+    setPracticeMessage(error.message)
+    return
+  }
+
+  setPracticeBalance(Number(data?.balance ?? 100))
+}
+
+const startPracticeRound = async () => {
+  const stake = Number(practiceStake)
+
+  if (!Number.isFinite(stake) || stake <= 0 || stake > practiceBalance) {
+    setPracticeMessage('Enter a valid stake within your practice balance.')
+    return
+  }
+
+  setPracticeBusy(true)
+  setPracticeMessage('Starting practice round...')
+  setPracticeResult('')
+  setPracticePayout(0)
+  setSelectedPracticeTile(null)
+
+  const { data, error } = await supabase.rpc('start_mines_practice', {
+    p_stake: stake,
+  })
+
+  if (error) {
+    setPracticeMessage(error.message)
+  } else {
+    setPracticeRoundId(data)
+    setPracticeBalance((current) => Number((current - stake).toFixed(2)))
+    setPracticeMessage('Round started. Choose one tile.')
+  }
+
+  setPracticeBusy(false)
+}
+
+const selectPracticeTile = async (tile: number) => {
+  if (!practiceRoundId || practiceBusy || practiceResult) return
+
+  setPracticeBusy(true)
+  setSelectedPracticeTile(tile)
+
+  const { data, error } = await supabase.rpc('select_mines_practice_tile', {
+    p_round_id: practiceRoundId,
+    p_selected_tile: tile,
+  })
+
+  if (error) {
+    setPracticeMessage(error.message)
+    setSelectedPracticeTile(null)
+  } else {
+    const result = Array.isArray(data) ? data[0] : data
+
+    setPracticeResult(result.round_status)
+    setPracticePayout(Number(result.payout))
+    setPracticeBalance((current) =>
+      Number((current + Number(result.payout)).toFixed(2))
+    )
+    setPracticeMessage(
+      result.round_status === 'won'
+        ? `You won $${Number(result.payout).toFixed(2)} in practice credits!`
+        : 'Not this time. Your practice stake was lost.'
+    )
+    setPracticeRoundId('')
+  }
+
+  setPracticeBusy(false)
+}
 
   const loadAccountData = async (id: string) => {
     setWalletLoading(true)
