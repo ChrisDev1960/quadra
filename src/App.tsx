@@ -150,6 +150,7 @@ const [selectedPracticeTile, setSelectedPracticeTile] = useState<number | null>(
   }
 
   setPracticeBalance(Number(data.balance))
+    console.log('QUADRA PRACTICE BALANCE:', data.balance)
   setPracticeMessage('')
 }
 
