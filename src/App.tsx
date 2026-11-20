@@ -5,19 +5,88 @@ import { supabase } from './lib/supabase'
 type AuthMode = 'home' | 'login' | 'signup' | 'forgot'
 type Tab = 'overview' | 'play' | 'wallet' | 'activity' | 'referrals' | 'profile'
 
+type Transaction = {
+  id: string
+  type: string
+  amount: number
+  status: string
+  description: string | null
+  created_at: string
+}
+
 function App() {
   const [mode, setMode] = useState<AuthMode>('home')
   const [tab, setTab] = useState<Tab>('overview')
   const [darkMode, setDarkMode] = useState(
     () => localStorage.getItem('quadra-theme') === 'dark'
   )
+
   const [userEmail, setUserEmail] = useState('')
+  const [userId, setUserId] = useState('')
   const [loggedIn, setLoggedIn] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(false)
+
+  const [balance, setBalance] = useState(0)
+  const [currency, setCurrency] = useState('USD')
+  const [transactions, setTransactions] = useState<Transaction[]>([])
+  const [walletLoading, setWalletLoading] = useState(false)
+  const [walletMessage, setWalletMessage] = useState('')
+
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
+
+  const loadAccountData = async (id: string) => {
+    setWalletLoading(true)
+    setWalletMessage('')
+
+    try {
+      const [walletResult, transactionResult, adminResult] =
+        await Promise.all([
+          supabase
+            .from('wallets')
+            .select('balance, currency')
+            .eq('user_id', id)
+            .maybeSingle(),
+
+          supabase
+            .from('wallet_transactions')
+            .select('id, type, amount, status, description, created_at')
+            .eq('user_id', id)
+            .order('created_at', { ascending: false })
+            .limit(20),
+
+          supabase.rpc('is_quadra_admin')
+        ])
+
+      if (walletResult.error) throw walletResult.error
+      if (transactionResult.error) throw transactionResult.error
+
+      if (!walletResult.data) {
+        setBalance(0)
+        setWalletMessage('Your wallet is being prepared. Please refresh shortly.')
+      } else {
+        setBalance(Number(walletResult.data.balance))
+        setCurrency(walletResult.data.currency)
+      }
+
+      setTransactions(transactionResult.data || [])
+      setIsAdmin(adminResult.data === true)
+
+      if (adminResult.error) {
+        console.error('Admin check failed:', adminResult.error.message)
+      }
+    } catch (error) {
+      console.error('Account data error:', error)
+      setWalletMessage(
+        error instanceof Error ? error.message : 'Unable to load wallet data.'
+      )
+    } finally {
+      setWalletLoading(false)
+    }
+  }
 
   useEffect(() => {
     document.documentElement.dataset.theme = darkMode ? 'dark' : 'light'
@@ -25,21 +94,44 @@ function App() {
   }, [darkMode])
 
   useEffect(() => {
+    let active = true
+
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) {
-        setLoggedIn(true)
-        setUserEmail(data.session.user.email || '')
+      if (!active) return
+
+      const session = data.session
+
+      setLoggedIn(!!session)
+      setUserId(session?.user.id || '')
+      setUserEmail(session?.user.email || '')
+
+      if (session?.user.id) {
+        loadAccountData(session.user.id)
       }
     })
 
     const { data: listener } = supabase.auth.onAuthStateChange(
       (_event, session) => {
+        if (!active) return
+
         setLoggedIn(!!session)
+        setUserId(session?.user.id || '')
         setUserEmail(session?.user.email || '')
+
+        if (session?.user.id) {
+          loadAccountData(session.user.id)
+        } else {
+          setBalance(0)
+          setTransactions([])
+          setIsAdmin(false)
+        }
       }
     )
 
-    return () => listener.subscription.unsubscribe()
+    return () => {
+      active = false
+      listener.subscription.unsubscribe()
+    }
   }, [])
 
   const resetForm = (nextMode: AuthMode) => {
@@ -77,6 +169,7 @@ function App() {
 
         if (data.session) {
           setLoggedIn(true)
+          setUserId(data.user?.id || '')
           setUserEmail(data.user?.email || email)
           setTab('overview')
         }
@@ -97,8 +190,10 @@ function App() {
         if (error) throw error
 
         setLoggedIn(true)
+        setUserId(data.user.id)
         setUserEmail(data.user.email || email)
         setTab('overview')
+        await loadAccountData(data.user.id)
       }
 
       if (mode === 'forgot') {
@@ -122,6 +217,10 @@ function App() {
     await supabase.auth.signOut()
     setLoggedIn(false)
     setUserEmail('')
+    setUserId('')
+    setBalance(0)
+    setTransactions([])
+    setIsAdmin(false)
     setTab('overview')
     setMode('home')
   }
@@ -136,6 +235,11 @@ function App() {
     { id: 'referrals', label: 'Referrals' },
     { id: 'profile', label: 'Profile' }
   ]
+
+  const formattedBalance = balance.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })
 
   if (loggedIn) {
     return (
@@ -160,17 +264,34 @@ function App() {
             <span className="section-label">YOUR QUADRA SPACE</span>
             <h1>Welcome back.</h1>
             <p>{userEmail}</p>
+            {isAdmin && (
+              <span className="section-label">QUADRA ADMINISTRATOR</span>
+            )}
           </div>
 
           <section className="wallet-card">
             <span>AVAILABLE BALANCE</span>
-            <h2>$0.00 <small>USD</small></h2>
-            <p>Your wallet balance will appear here.</p>
+            <h2>${formattedBalance} <small>{currency}</small></h2>
+            <p>
+              {walletLoading
+                ? 'Updating your wallet...'
+                : 'Your account wallet balance'}
+            </p>
             <div className="wallet-actions">
               <button onClick={() => setTab('wallet')}>Wallet details</button>
               <button onClick={() => setTab('activity')}>Transactions</button>
+              <button
+                onClick={() => loadAccountData(userId)}
+                disabled={walletLoading}
+              >
+                Refresh
+              </button>
             </div>
           </section>
+
+          {walletMessage && (
+            <div className="notice" role="status">{walletMessage}</div>
+          )}
 
           <nav className="dashboard-nav">
             {navItems.map((item) => (
@@ -212,6 +333,13 @@ function App() {
                   <small>Your referral space</small>
                 </button>
               </div>
+
+              {isAdmin && (
+                <div className="notice">
+                  Administrator access detected. Your management dashboard
+                  will be connected next.
+                </div>
+              )}
             </section>
           )}
 
@@ -220,8 +348,9 @@ function App() {
               <span className="section-label">THE QUADRA EXPERIENCE</span>
               <h2>Four cups. One choice.</h2>
               <p>
-                Explore the four-cup interface. Real-money gameplay is not
-                available yet.
+                Explore the four-cup interface. Real-money gameplay remains
+                disabled until all required launch approvals and safeguards
+                are in place.
               </p>
 
               <div className="dashboard-cups">
@@ -240,8 +369,8 @@ function App() {
               </div>
 
               <div className="notice">
-                Game access is being prepared. No deposits, stakes or payouts
-                are currently enabled.
+                Game outcomes and payouts will be handled securely on the
+                server when the game is approved for launch.
               </div>
             </section>
           )}
@@ -250,11 +379,24 @@ function App() {
             <section className="dashboard-panel">
               <span className="section-label">YOUR WALLET</span>
               <h2>USD wallet</h2>
-              <div className="wallet-balance-small">$0.00 USD</div>
-              <p>Your wallet is not yet connected to deposit or withdrawal services.</p>
+              <div className="wallet-balance-small">
+                ${formattedBalance} {currency}
+              </div>
+              <p>
+                {walletLoading
+                  ? 'Loading wallet...'
+                  : 'Balance retrieved from your QUADRA account.'}
+              </p>
+              <button
+                className="login-button"
+                onClick={() => loadAccountData(userId)}
+                disabled={walletLoading}
+              >
+                Refresh wallet
+              </button>
               <div className="notice">
-                Deposits and withdrawals will become available only after
-                payment and compliance systems are approved.
+                Deposit and withdrawal requests will be connected to your
+                administrator approval system next.
               </div>
             </section>
           )}
@@ -263,11 +405,31 @@ function App() {
             <section className="dashboard-panel">
               <span className="section-label">ACCOUNT RECORDS</span>
               <h2>Recent activity</h2>
-              <div className="empty-state">
-                <span>—</span>
-                <strong>No activity yet</strong>
-                <p>Your account activity will appear here.</p>
-              </div>
+
+              {transactions.length === 0 ? (
+                <div className="empty-state">
+                  <span>—</span>
+                  <strong>No transactions yet</strong>
+                  <p>Your financial transaction history will appear here.</p>
+                </div>
+              ) : (
+                <div>
+                  {transactions.map((transaction) => (
+                    <div className="profile-detail" key={transaction.id}>
+                      <div>
+                        <strong>{transaction.type.replace('_', ' ')}</strong>
+                        <p>{transaction.description || transaction.status}</p>
+                        <small>
+                          {new Date(transaction.created_at).toLocaleString()}
+                        </small>
+                      </div>
+                      <strong>
+                        ${Number(transaction.amount).toFixed(2)}
+                      </strong>
+                    </div>
+                  ))}
+                </div>
+              )}
             </section>
           )}
 
@@ -293,9 +455,15 @@ function App() {
               </div>
               <div className="profile-detail">
                 <span>Account currency</span>
-                <strong>USD</strong>
+                <strong>{currency}</strong>
               </div>
-              <button className="logout-action" onClick={logout}>Log out of QUADRA</button>
+              <div className="profile-detail">
+                <span>Account type</span>
+                <strong>{isAdmin ? 'Administrator' : 'User'}</strong>
+              </div>
+              <button className="logout-action" onClick={logout}>
+                Log out of QUADRA
+              </button>
             </section>
           )}
         </div>
@@ -405,11 +573,19 @@ function App() {
               )}
 
               <button className="primary-button auth-submit" disabled={loading}>
-                {loading ? 'Please wait...' : mode === 'login' ? 'Log in' : mode === 'signup' ? 'Create account' : 'Send recovery email'}
+                {loading
+                  ? 'Please wait...'
+                  : mode === 'login'
+                    ? 'Log in'
+                    : mode === 'signup'
+                      ? 'Create account'
+                      : 'Send recovery email'}
                 <span>↗</span>
               </button>
 
-              {message && <p className="auth-message" role="status">{message}</p>}
+              {message && (
+                <p className="auth-message" role="status">{message}</p>
+              )}
             </form>
 
             <div className="auth-switch">
@@ -443,7 +619,9 @@ function App() {
                   <div className="cup-shadow"></div>
                   <div className="cup">
                     <div className="cup-rim"></div>
-                    <div className="cup-body"><div className="cup-detail"></div></div>
+                    <div className="cup-body">
+                      <div className="cup-detail"></div>
+                    </div>
                     <div className="cup-base"></div>
                   </div>
                   <span className="cup-label">0{cup}</span>
