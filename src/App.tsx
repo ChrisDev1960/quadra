@@ -335,7 +335,7 @@ const selectPracticeTile = async (tile: number) => {
     if (loggedIn && isAdmin && tab === 'admin') loadAdminData()
   }, [loggedIn, isAdmin, tab])
   useEffect(() => {
-  if (loggedIn && userId && tab === 'play') {
+  if (loggedIn && tab === 'play') {
     loadPracticeBalance()
   }
 }, [loggedIn, userId, tab])
