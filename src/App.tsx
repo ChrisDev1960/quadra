@@ -319,6 +319,11 @@ const selectPracticeTile = async (tile: number) => {
   useEffect(() => {
     if (loggedIn && isAdmin && tab === 'admin') loadAdminData()
   }, [loggedIn, isAdmin, tab])
+  useEffect(() => {
+  if (loggedIn && userId && tab === 'play') {
+    loadPracticeBalance()
+  }
+}, [loggedIn, userId, tab])
 
   const resetForm = (nextMode: AuthMode) => {
     setMode(nextMode)
