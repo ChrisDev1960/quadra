@@ -449,11 +449,6 @@ function App() {
     { id: 'profile', label: 'Profile' }
   ]
 
-  const formattedBalance = balance.toLocaleString('en-US', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  })
-
   const money = (amount: number) => '$' + Number(amount).toLocaleString('en-US', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
@@ -468,21 +463,22 @@ function App() {
           <a className="brand" href="#" onClick={e => { e.preventDefault(); navigate('overview') }}>
             QUADRA<span>.</span>
           </a>
-          <div className="dashboard-header-actions">
-  {(tab === 'overview' || tab === 'play') && (
-    <button
-      className="top-balance top-balance-compact"
-      onClick={() => navigate('wallet')}
-      aria-label={`Wallet balance ${money(balance)} ${currency}`}
-    >
-      <span>Balance</span>
-      <strong>{money(balance)}</strong>
-      <small>{currency}</small>
-    </button>
-  )}
 
-  {isAdmin && <span className="admin-pill">ADMIN</span>}
-</div>
+          <div className="dashboard-header-actions">
+            {(tab === 'overview' || tab === 'play') && (
+              <button
+                className="top-balance top-balance-compact"
+                onClick={() => navigate('wallet')}
+                aria-label={`Wallet balance ${money(balance)} ${currency}`}
+              >
+                <span>Balance</span>
+                <strong>{money(balance)}</strong>
+                <small>{currency}</small>
+              </button>
+            )}
+
+            {isAdmin && <span className="admin-pill">ADMIN</span>}
+          </div>
         </header>
 
         <nav className="dashboard-nav">
@@ -507,9 +503,7 @@ function App() {
             <>
               <div className="dashboard-topline">
                 <div className="dashboard-welcome">
-                  <span className="section-label">YOUR QUADRA SPACE</span>
                   <h1>Welcome back, {displayName}.</h1>
-                  <p>Your personal QUADRA space.</p>
                 </div>
               </div>
 
@@ -527,7 +521,7 @@ function App() {
                 </div>
               </section>
 
-              <section className="dashboard-panel">
+              <section className="dashboard-panel overview-panel">
                 <div className="panel-heading">
                   <div>
                     <span className="section-label">YOUR OVERVIEW</span>
@@ -535,6 +529,7 @@ function App() {
                   </div>
                   <span className="soft-tag">ACCOUNT</span>
                 </div>
+
                 <div className="dashboard-grid">
                   <button onClick={() => navigate('play')}>
                     <span>01</span><strong>Mines</strong><small>Explore the game</small>
@@ -549,6 +544,7 @@ function App() {
                     <span>04</span><strong>Referrals</strong><small>Your referral space</small>
                   </button>
                 </div>
+
                 {isAdmin && (
                   <div className="notice">
                     Administrator access is active.
@@ -610,6 +606,7 @@ function App() {
                   </div>
                   <span className="preview-tag">NOT ACTIVE</span>
                 </div>
+
                 <p className="auto-description">Set your preferences now. These settings are saved on this device for when the feature is ready.</p>
 
                 <div className="auto-settings-grid">
@@ -647,11 +644,14 @@ function App() {
                       onChange={e => updateAutoSetting('stopOnLoss', e.target.checked)} />
                   </label>
                 </div>
+
                 {autoSettingsMessage && <p className="settings-saved">{autoSettingsMessage}</p>}
+
                 <button className="secondary-button" onClick={() => {
                   setAutoSettings(defaultAutoSettings)
                   setAutoSettingsMessage('Default settings restored.')
                 }}>Reset settings</button>
+
                 <button className="primary-button auto-disabled-button" disabled>Auto Bet unavailable until launch</button>
               </div>
             </section>
@@ -697,6 +697,7 @@ function App() {
                   <strong>{QUADRA_DEPOSIT_ADDRESS}</strong>
                   <button type="button" className="secondary-button" onClick={copyDepositAddress}>Copy address</button>
                 </div>
+
                 {depositCopyMessage && <p role="status">{depositCopyMessage}</p>}
 
                 <div className="notice">Use only the network selected above. Ethereum ERC20 and BNB Smart Chain BEP20 are different networks. Sending through the wrong network may result in loss of funds.</div>
@@ -789,9 +790,11 @@ function App() {
               <span className="section-label">QUADRA CONTROL CENTRE</span>
               <h2>Management dashboard.</h2>
               <p>Review requests and manage accounts. Withdrawals are paid manually by you.</p>
+
               <button className="secondary-button" onClick={loadAdminData} disabled={adminLoading}>
                 {adminLoading ? 'Refreshing...' : 'Refresh management data'}
               </button>
+
               {adminMessage && <div className="notice" role="status">{adminMessage}</div>}
 
               <div className="dashboard-grid admin-stats">
@@ -838,6 +841,7 @@ function App() {
                       {item.transaction_hash && <p>TX: {item.transaction_hash}</p>}
                       {item.admin_note && <p>Admin note: {item.admin_note}</p>}
                     </div>
+
                     <div className="admin-record-actions">
                       {item.status === 'pending' && (
                         <>
@@ -848,6 +852,7 @@ function App() {
                           </div>
                         </>
                       )}
+
                       {item.status === 'approved' && (
                         <>
                           <p>Verify the recipient, token, amount and blockchain transaction before confirming payment.</p>
@@ -911,26 +916,34 @@ function App() {
             <p className="auth-description">
               {mode === 'login' ? 'Sign in to continue your QUADRA experience.' : mode === 'signup' ? 'A new experience begins with your account.' : 'Enter your email to receive password recovery instructions.'}
             </p>
+
             <form onSubmit={handleAuth}>
               <label htmlFor="email">Email address</label>
               <input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com" autoComplete="email" required />
+
               {mode !== 'forgot' && <>
                 <label htmlFor="password">Password</label>
                 <input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="At least 8 characters" autoComplete={mode === 'login' ? 'current-password' : 'new-password'} minLength={8} required />
               </>}
+
               {mode === 'signup' && <>
                 <label htmlFor="confirm-password">Confirm password</label>
                 <input id="confirm-password" type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="Enter your password again" autoComplete="new-password" minLength={8} required />
               </>}
+
               {mode === 'login' && <button type="button" className="forgot-link" onClick={() => resetForm('forgot')}>Forgot password?</button>}
+
               <button className="primary-button auth-submit" disabled={loading}>
                 {loading ? 'Please wait...' : mode === 'login' ? 'Log in' : mode === 'signup' ? 'Create account' : 'Send recovery email'}
               </button>
+
               {message && <p className="auth-message" role="status">{message}</p>}
             </form>
+
             <div className="auth-switch">
               {mode === 'login' ? <>New to QUADRA? <button onClick={() => resetForm('signup')}>Create an account</button></> : <>Already have an account? <button onClick={() => resetForm('login')}>Log in</button></>}
             </div>
+
             <button className="back-home" onClick={() => resetForm('home')}>Back to homepage</button>
           </div>
         </section>
@@ -940,15 +953,18 @@ function App() {
             <div className="eyebrow"><span className="status-dot"></span>A NEW KIND OF GAMING EXPERIENCE</div>
             <h1>Less noise.<br /><span>More anticipation.</span></h1>
             <p className="hero-description">A refined Mines experience built around simplicity, anticipation and the art of the unexpected.</p>
+
             <div className="landing-mines">
               <div className="landing-mines-tile"><span>✦</span></div>
               <div className="landing-mines-tile"></div>
               <div className="landing-mines-tile"></div>
               <div className="landing-mines-tile"></div>
             </div>
+
             <button className="primary-button" onClick={() => resetForm('signup')}>Get started</button>
             <p className="hero-note">QUADRA MINES · A DISTINCT EXPERIENCE</p>
           </section>
+
           <section className="about-section" id="about">
             <span className="section-label">THE QUADRA PHILOSOPHY</span>
             <h2>Designed with intention.</h2>
