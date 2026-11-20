@@ -469,16 +469,20 @@ function App() {
             QUADRA<span>.</span>
           </a>
           <div className="dashboard-header-actions">
-            {tab === 'overview' && (
-              <button className="top-balance" onClick={() => navigate('wallet')}>
-                <span>BALANCE</span>
-                <strong>{money(balance)}</strong>
-                <small>{currency}</small>
-              </button>
-            )}
-            {isAdmin && <span className="admin-pill">ADMIN</span>}
-            <button className="login-button" onClick={logout}>Log out</button>
-          </div>
+  {(tab === 'overview' || tab === 'play') && (
+    <button
+      className="top-balance top-balance-compact"
+      onClick={() => navigate('wallet')}
+      aria-label={`Wallet balance ${money(balance)} ${currency}`}
+    >
+      <span>Balance</span>
+      <strong>{money(balance)}</strong>
+      <small>{currency}</small>
+    </button>
+  )}
+
+  {isAdmin && <span className="admin-pill">ADMIN</span>}
+</div>
         </header>
 
         <nav className="dashboard-nav">
