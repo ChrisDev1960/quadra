@@ -417,10 +417,13 @@ function App() {
     setMode('home')
   }
 
-  const updateAutoSetting = (key: keyof AutoSettings, value: string | boolean) => {
-    setAutoSettings(prev => ({ ...prev, [key]: value }))
-    setAutoSettingsMessage('Settings saved on this device.')
-  }
+  const updateAutoSetting = <K extends keyof AutoSettings>(
+  key: K,
+  value: AutoSettings[K]
+) => {
+  setAutoSettings(prev => ({ ...prev, [key]: value }))
+  setAutoSettingsMessage('Settings saved on this device.')
+}
 
   const navItems: { id: Tab; label: string }[] = [
     { id: 'overview', label: 'Home' },
