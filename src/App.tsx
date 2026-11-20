@@ -4,6 +4,11 @@ import { supabase } from './lib/supabase'
 
 const QUADRA_DEPOSIT_ADDRESS = '0xe801e50631c03a1aaf2d30bb1f2f196864db58a5'
 
+const SUPPORTED_NETWORKS = [
+  'Ethereum (ERC20)',
+  'BNB Smart Chain (BEP20)'
+]
+
 type AuthMode = 'home' | 'login' | 'signup' | 'forgot'
 type Tab = 'overview' | 'play' | 'wallet' | 'activity' | 'referrals' | 'profile' | 'admin'
 
@@ -48,6 +53,7 @@ type AdminUser = {
 function App() {
   const [mode, setMode] = useState<AuthMode>('home')
   const [tab, setTab] = useState<Tab>('overview')
+
   const [darkMode, setDarkMode] = useState(
     () => localStorage.getItem('quadra-theme') === 'dark'
   )
@@ -75,8 +81,11 @@ function App() {
   const [depositReference, setDepositReference] = useState('')
   const [depositNetwork, setDepositNetwork] = useState('Ethereum (ERC20)')
   const [depositCopyMessage, setDepositCopyMessage] = useState('')
+
   const [withdrawalAmount, setWithdrawalAmount] = useState('')
   const [withdrawalAddress, setWithdrawalAddress] = useState('')
+  const [withdrawalNetwork, setWithdrawalNetwork] = useState('Ethereum (ERC20)')
+
   const [walletActionLoading, setWalletActionLoading] = useState(false)
 
   const [email, setEmail] = useState('')
@@ -188,6 +197,7 @@ function App() {
       if (!active) return
 
       const session = data.session
+
       setLoggedIn(!!session)
       setUserId(session?.user.id || '')
       setUserEmail(session?.user.email || '')
@@ -289,6 +299,7 @@ function App() {
         setUserId(data.user.id)
         setUserEmail(data.user.email || email)
         setTab('overview')
+
         await loadAccountData(data.user.id)
       }
 
@@ -298,6 +309,7 @@ function App() {
         })
 
         if (error) throw error
+
         setMessage('Password recovery instructions have been sent.')
       }
     } catch (error) {
@@ -312,7 +324,9 @@ function App() {
       await navigator.clipboard.writeText(QUADRA_DEPOSIT_ADDRESS)
       setDepositCopyMessage('Address copied successfully.')
     } catch {
-      setDepositCopyMessage('Unable to copy automatically. Please select and copy the address.')
+      setDepositCopyMessage(
+        'Unable to copy automatically. Please select and copy the address.'
+      )
     }
   }
 
@@ -323,6 +337,7 @@ function App() {
 
     try {
       const amount = Number(depositAmount)
+
       if (!Number.isFinite(amount) || amount <= 0) {
         throw new Error('Enter a valid deposit amount.')
       }
@@ -330,10 +345,12 @@ function App() {
       const hash = depositReference.trim()
 
       if (!/^0x[a-fA-F0-9]{64}$/.test(hash)) {
-        throw new Error('Enter a valid EVM transaction hash beginning with 0x and containing 64 hexadecimal characters.')
+        throw new Error(
+          'Enter a valid EVM transaction hash beginning with 0x and containing 64 hexadecimal characters.'
+        )
       }
 
-      if (!['Ethereum (ERC20)', 'BNB Smart Chain (BEP20)'].includes(depositNetwork)) {
+      if (!SUPPORTED_NETWORKS.includes(depositNetwork)) {
         throw new Error('Select a supported deposit network.')
       }
 
@@ -347,11 +364,16 @@ function App() {
 
       if (error) throw error
 
-      setWalletMessage('Deposit request submitted. It is awaiting administrator verification.')
+      setWalletMessage(
+        'Deposit request submitted. It is awaiting administrator verification.'
+      )
+
       setDepositAmount('')
       setDepositReference('')
     } catch (error) {
-      setWalletMessage(error instanceof Error ? error.message : 'Deposit request failed.')
+      setWalletMessage(
+        error instanceof Error ? error.message : 'Deposit request failed.'
+      )
     } finally {
       setWalletActionLoading(false)
     }
@@ -364,27 +386,43 @@ function App() {
 
     try {
       const amount = Number(withdrawalAmount)
+
       if (!Number.isFinite(amount) || amount <= 0) {
         throw new Error('Enter a valid withdrawal amount.')
       }
-      if (!withdrawalAddress.trim()) {
-        throw new Error('Enter your TRON wallet address.')
+
+      const address = withdrawalAddress.trim()
+
+      if (!/^0x[a-fA-F0-9]{40}$/.test(address)) {
+        throw new Error(
+          'Enter a valid Ethereum or BNB Smart Chain wallet address.'
+        )
+      }
+
+      if (!SUPPORTED_NETWORKS.includes(withdrawalNetwork)) {
+        throw new Error('Select a supported withdrawal network.')
       }
 
       const { error } = await supabase.rpc('request_quadra_withdrawal', {
         p_amount: amount,
-        p_network: 'TRC20',
-        p_destination_address: withdrawalAddress.trim()
+        p_network: withdrawalNetwork,
+        p_destination_address: address
       })
 
       if (error) throw error
 
-      setWalletMessage('Withdrawal request submitted. Your funds are reserved while it is reviewed.')
+      setWalletMessage(
+        'Withdrawal request submitted. Your funds are reserved while the request is reviewed.'
+      )
+
       setWithdrawalAmount('')
       setWithdrawalAddress('')
+
       await loadAccountData(userId)
     } catch (error) {
-      setWalletMessage(error instanceof Error ? error.message : 'Withdrawal request failed.')
+      setWalletMessage(
+        error instanceof Error ? error.message : 'Withdrawal request failed.'
+      )
     } finally {
       setWalletActionLoading(false)
     }
@@ -399,7 +437,10 @@ function App() {
     setAdminMessage('Processing administrator action...')
 
     try {
-      const args: Record<string, string> = { p_request_id: requestId }
+      const args: Record<string, string> = {
+        p_request_id: requestId
+      }
+
       if (rpcName === 'mark_withdrawal_paid') {
         args.p_transaction_hash = hash || ''
       } else {
@@ -407,19 +448,29 @@ function App() {
       }
 
       const { error } = await supabase.rpc(rpcName, args)
+
       if (error) throw error
 
       setAdminMessage('Action completed successfully.')
       setAdminNote('')
+
+      setPayoutHashes(prev => ({
+        ...prev,
+        [requestId]: ''
+      }))
+
       await loadAdminData()
       await loadAccountData(userId)
     } catch (error) {
-      setAdminMessage(error instanceof Error ? error.message : 'Administrator action failed.')
+      setAdminMessage(
+        error instanceof Error ? error.message : 'Administrator action failed.'
+      )
     }
   }
 
   const logout = async () => {
     await supabase.auth.signOut()
+
     setLoggedIn(false)
     setUserEmail('')
     setUserId('')
@@ -464,7 +515,10 @@ function App() {
             <button className="login-button" onClick={toggleTheme}>
               {darkMode ? '☀ Light' : '☾ Dark'}
             </button>
-            <button className="login-button" onClick={logout}>Log out</button>
+
+            <button className="login-button" onClick={logout}>
+              Log out
+            </button>
           </div>
         </header>
 
@@ -473,24 +527,40 @@ function App() {
             <span className="section-label">YOUR QUADRA SPACE</span>
             <h1>Welcome back.</h1>
             <p>{userEmail}</p>
-            {isAdmin && <span className="section-label">QUADRA ADMINISTRATOR</span>}
+            {isAdmin && (
+              <span className="section-label">QUADRA ADMINISTRATOR</span>
+            )}
           </div>
 
           <section className="wallet-card">
             <span>AVAILABLE BALANCE</span>
             <h2>${formattedBalance} <small>{currency}</small></h2>
-            <p>{walletLoading ? 'Updating your wallet...' : 'Your account wallet balance'}</p>
+            <p>
+              {walletLoading
+                ? 'Updating your wallet...'
+                : 'Your account wallet balance'}
+            </p>
+
             <div className="wallet-actions">
               <button onClick={() => setTab('wallet')}>Wallet details</button>
               <button onClick={() => setTab('activity')}>Transactions</button>
-              <button onClick={() => loadAccountData(userId)} disabled={walletLoading}>Refresh</button>
+              <button
+                onClick={() => loadAccountData(userId)}
+                disabled={walletLoading}
+              >
+                Refresh
+              </button>
             </div>
           </section>
 
-          {walletMessage && <div className="notice" role="status">{walletMessage}</div>}
+          {walletMessage && (
+            <div className="notice" role="status">
+              {walletMessage}
+            </div>
+          )}
 
           <nav className="dashboard-nav">
-            {navItems.map((item) => (
+            {navItems.map(item => (
               <button
                 key={item.id}
                 className={tab === item.id ? 'dashboard-nav-active' : ''}
@@ -499,6 +569,7 @@ function App() {
                 {item.label}
               </button>
             ))}
+
             {isAdmin && (
               <button
                 className={tab === 'admin' ? 'dashboard-nav-active' : ''}
@@ -514,16 +585,45 @@ function App() {
               <span className="section-label">YOUR OVERVIEW</span>
               <h2>Everything in one place.</h2>
               <p>Manage your account and explore the QUADRA experience.</p>
+
               <div className="dashboard-grid">
-                <button onClick={() => setTab('play')}><span>01</span><strong>Four Cups</strong><small>Explore the game</small></button>
-                <button onClick={() => setTab('wallet')}><span>02</span><strong>My Wallet</strong><small>View USD balance</small></button>
-                <button onClick={() => setTab('activity')}><span>03</span><strong>Activity</strong><small>View transaction history</small></button>
-                <button onClick={() => setTab('referrals')}><span>04</span><strong>Referrals</strong><small>Your referral space</small></button>
+                <button onClick={() => setTab('play')}>
+                  <span>01</span>
+                  <strong>Four Cups</strong>
+                  <small>Explore the game</small>
+                </button>
+
+                <button onClick={() => setTab('wallet')}>
+                  <span>02</span>
+                  <strong>My Wallet</strong>
+                  <small>View USD balance</small>
+                </button>
+
+                <button onClick={() => setTab('activity')}>
+                  <span>03</span>
+                  <strong>Activity</strong>
+                  <small>View transaction history</small>
+                </button>
+
+                <button onClick={() => setTab('referrals')}>
+                  <span>04</span>
+                  <strong>Referrals</strong>
+                  <small>Your referral space</small>
+                </button>
               </div>
+
               {isAdmin && (
                 <div className="notice">
-                  Administrator access active. Open the Admin tab to manage requests and users.
-                  <p><button className="login-button" onClick={() => setTab('admin')}>Open management dashboard</button></p>
+                  Administrator access active. Open the Admin tab to manage
+                  requests and users.
+                  <p>
+                    <button
+                      className="login-button"
+                      onClick={() => setTab('admin')}
+                    >
+                      Open management dashboard
+                    </button>
+                  </p>
                 </div>
               )}
             </section>
@@ -533,108 +633,243 @@ function App() {
             <section className="dashboard-panel">
               <span className="section-label">QUADRA CONTROL CENTRE</span>
               <h2>Management dashboard.</h2>
-              <p>Review requests and manage accounts. Withdrawals are paid manually by you.</p>
+              <p>
+                Review requests and manage accounts. Withdrawals are paid
+                manually by you.
+              </p>
 
-              <button className="login-button" onClick={loadAdminData} disabled={adminLoading}>
+              <button
+                className="login-button"
+                onClick={loadAdminData}
+                disabled={adminLoading}
+              >
                 {adminLoading ? 'Refreshing...' : 'Refresh management data'}
               </button>
 
-              {adminMessage && <div className="notice" role="status">{adminMessage}</div>}
+              {adminMessage && (
+                <div className="notice" role="status">
+                  {adminMessage}
+                </div>
+              )}
 
               <div className="dashboard-grid">
-                <div><span className="section-label">REGISTERED USERS</span><h2>{adminUsers.length}</h2></div>
-                <div><span className="section-label">DEPOSIT REQUESTS</span><h2>{deposits.length}</h2></div>
-                <div><span className="section-label">WITHDRAWAL REQUESTS</span><h2>{withdrawals.length}</h2></div>
-                <div><span className="section-label">PENDING DEPOSITS</span><h2>{deposits.filter(x => x.status === 'pending').length}</h2></div>
+                <div>
+                  <span className="section-label">REGISTERED USERS</span>
+                  <h2>{adminUsers.length}</h2>
+                </div>
+
+                <div>
+                  <span className="section-label">DEPOSIT REQUESTS</span>
+                  <h2>{deposits.length}</h2>
+                </div>
+
+                <div>
+                  <span className="section-label">WITHDRAWAL REQUESTS</span>
+                  <h2>{withdrawals.length}</h2>
+                </div>
+
+                <div>
+                  <span className="section-label">PENDING DEPOSITS</span>
+                  <h2>
+                    {deposits.filter(x => x.status === 'pending').length}
+                  </h2>
+                </div>
               </div>
 
               <div className="admin-section">
                 <span className="section-label">DEPOSIT MANAGEMENT</span>
                 <h2>Incoming deposits</h2>
-                {deposits.length === 0 ? <p>No deposit requests yet.</p> : deposits.map(item => (
-                  <div className="profile-detail" key={item.id}>
-                    <div>
-                      <strong>{money(item.amount)} · {item.status.toUpperCase()}</strong>
-                      <p>User: {item.user_id}</p>
-                      <p>Network: {item.network || 'Not provided'}</p>
-                      <p>Transaction hash: {item.payment_reference || 'Not provided'}</p>
-                      <small>{new Date(item.created_at).toLocaleString()}</small>
-                      {item.admin_note && <p>Admin note: {item.admin_note}</p>}
-                    </div>
-                    {item.status === 'pending' && (
-                      <div className="wallet-actions">
-                        <button onClick={() => adminAction('approve_deposit', item.id, adminNote)}>Approve</button>
-                        <button onClick={() => adminAction('reject_deposit', item.id, adminNote)}>Reject</button>
+
+                {deposits.length === 0 ? (
+                  <p>No deposit requests yet.</p>
+                ) : (
+                  deposits.map(item => (
+                    <div className="profile-detail" key={item.id}>
+                      <div>
+                        <strong>
+                          {money(item.amount)} · {item.status.toUpperCase()}
+                        </strong>
+                        <p>User: {item.user_id}</p>
+                        <p>Network: {item.network || 'Not provided'}</p>
+                        <p>
+                          Transaction hash:{' '}
+                          {item.payment_reference || 'Not provided'}
+                        </p>
+                        <small>
+                          {new Date(item.created_at).toLocaleString()}
+                        </small>
+                        {item.admin_note && (
+                          <p>Admin note: {item.admin_note}</p>
+                        )}
                       </div>
-                    )}
-                  </div>
-                ))}
+
+                      {item.status === 'pending' && (
+                        <div className="wallet-actions">
+                          <button
+                            onClick={() =>
+                              adminAction('approve_deposit', item.id, adminNote)
+                            }
+                          >
+                            Approve
+                          </button>
+
+                          <button
+                            onClick={() =>
+                              adminAction('reject_deposit', item.id, adminNote)
+                            }
+                          >
+                            Reject
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ))
+                )}
               </div>
 
               <div className="admin-section">
                 <span className="section-label">WITHDRAWAL MANAGEMENT</span>
                 <h2>Outgoing requests</h2>
-                {withdrawals.length === 0 ? <p>No withdrawal requests yet.</p> : withdrawals.map(item => (
-                  <div className="profile-detail" key={item.id}>
-                    <div>
-                      <strong>{money(item.amount)} · {item.status.toUpperCase()}</strong>
-                      <p>User: {item.user_id}</p>
-                      <p>Network: {item.network}</p>
-                      <p>Destination: {item.destination_address}</p>
-                      <small>{new Date(item.created_at).toLocaleString()}</small>
-                      {item.transaction_hash && <p>TX: {item.transaction_hash}</p>}
-                      {item.admin_note && <p>Admin note: {item.admin_note}</p>}
+
+                {withdrawals.length === 0 ? (
+                  <p>No withdrawal requests yet.</p>
+                ) : (
+                  withdrawals.map(item => (
+                    <div className="profile-detail" key={item.id}>
+                      <div>
+                        <strong>
+                          {money(item.amount)} · {item.status.toUpperCase()}
+                        </strong>
+
+                        <p>User: {item.user_id}</p>
+                        <p>Network: {item.network}</p>
+                        <p>Destination: {item.destination_address}</p>
+
+                        <small>
+                          {new Date(item.created_at).toLocaleString()}
+                        </small>
+
+                        {item.transaction_hash && (
+                          <p>TX: {item.transaction_hash}</p>
+                        )}
+
+                        {item.admin_note && (
+                          <p>Admin note: {item.admin_note}</p>
+                        )}
+                      </div>
+
+                      <div>
+                        {item.status === 'pending' && (
+                          <>
+                            <input
+                              placeholder="Optional admin note"
+                              value={adminNote}
+                              onChange={e => setAdminNote(e.target.value)}
+                            />
+
+                            <div className="wallet-actions">
+                              <button
+                                onClick={() =>
+                                  adminAction(
+                                    'approve_withdrawal',
+                                    item.id,
+                                    adminNote
+                                  )
+                                }
+                              >
+                                Approve request
+                              </button>
+
+                              <button
+                                onClick={() =>
+                                  adminAction(
+                                    'reject_withdrawal',
+                                    item.id,
+                                    adminNote
+                                  )
+                                }
+                              >
+                                Reject + refund
+                              </button>
+                            </div>
+                          </>
+                        )}
+
+                        {item.status === 'approved' && (
+                          <>
+                            <p>
+                              Send the USDT manually using the network shown
+                              above. Verify the recipient, token, amount and
+                              blockchain transaction before confirming payment.
+                            </p>
+
+                            <input
+                              placeholder="0x... transaction hash"
+                              value={payoutHashes[item.id] || ''}
+                              onChange={e =>
+                                setPayoutHashes(prev => ({
+                                  ...prev,
+                                  [item.id]: e.target.value
+                                }))
+                              }
+                            />
+
+                            <button
+                              onClick={() =>
+                                adminAction(
+                                  'mark_withdrawal_paid',
+                                  item.id,
+                                  '',
+                                  payoutHashes[item.id]
+                                )
+                              }
+                              disabled={
+                                !/^0x[a-fA-F0-9]{64}$/.test(
+                                  payoutHashes[item.id]?.trim() || ''
+                                )
+                              }
+                            >
+                              Confirm sent · Mark paid
+                            </button>
+
+                            <button
+                              onClick={() =>
+                                adminAction(
+                                  'reject_withdrawal',
+                                  item.id,
+                                  adminNote
+                                )
+                              }
+                            >
+                              Reject + refund
+                            </button>
+                          </>
+                        )}
+                      </div>
                     </div>
-                    <div>
-                      {item.status === 'pending' && (
-                        <>
-                          <input
-                            placeholder="Optional admin note"
-                            value={adminNote}
-                            onChange={e => setAdminNote(e.target.value)}
-                          />
-                          <div className="wallet-actions">
-                            <button onClick={() => adminAction('approve_withdrawal', item.id, adminNote)}>Approve request</button>
-                            <button onClick={() => adminAction('reject_withdrawal', item.id, adminNote)}>Reject + refund</button>
-                          </div>
-                        </>
-                      )}
-                      {item.status === 'approved' && (
-                        <>
-                          <p>Send the USDT yourself to the address above. Then enter the real transaction hash.</p>
-                          <input
-                            placeholder="TRON transaction hash"
-                            value={payoutHashes[item.id] || ''}
-                            onChange={e => setPayoutHashes(prev => ({ ...prev, [item.id]: e.target.value }))}
-                          />
-                          <button
-                            onClick={() => adminAction('mark_withdrawal_paid', item.id, '', payoutHashes[item.id])}
-                            disabled={!payoutHashes[item.id]?.trim()}
-                          >
-                            Confirm sent · Mark paid
-                          </button>
-                          <button onClick={() => adminAction('reject_withdrawal', item.id, adminNote)}>
-                            Reject + refund
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
 
               <div className="admin-section">
                 <span className="section-label">USER MANAGEMENT</span>
                 <h2>Registered accounts</h2>
-                {adminUsers.length === 0 ? <p>No user profiles found.</p> : adminUsers.map(item => (
-                  <div className="profile-detail" key={item.id}>
-                    <div>
-                      <strong>{item.email || 'Email unavailable'}</strong>
-                      <small>{item.id}</small>
-                      <p>Joined: {new Date(item.created_at).toLocaleDateString()}</p>
+
+                {adminUsers.length === 0 ? (
+                  <p>No user profiles found.</p>
+                ) : (
+                  adminUsers.map(item => (
+                    <div className="profile-detail" key={item.id}>
+                      <div>
+                        <strong>{item.email || 'Email unavailable'}</strong>
+                        <small>{item.id}</small>
+                        <p>
+                          Joined: {new Date(item.created_at).toLocaleDateString()}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </section>
           )}
@@ -643,16 +878,31 @@ function App() {
             <section className="dashboard-panel">
               <span className="section-label">THE QUADRA EXPERIENCE</span>
               <h2>Four cups. One choice.</h2>
-              <p>Explore the four-cup interface. Real-money gameplay remains disabled until all required launch approvals and safeguards are in place.</p>
+              <p>
+                Explore the four-cup interface. Real-money gameplay remains
+                disabled until all required launch approvals and safeguards
+                are in place.
+              </p>
+
               <div className="dashboard-cups">
                 {[1, 2, 3, 4].map(cup => (
                   <div className="dashboard-cup" key={cup}>
-                    <div className="cup"><div className="cup-rim"></div><div className="cup-body"><div className="cup-detail"></div></div><div className="cup-base"></div></div>
+                    <div className="cup">
+                      <div className="cup-rim"></div>
+                      <div className="cup-body">
+                        <div className="cup-detail"></div>
+                      </div>
+                      <div className="cup-base"></div>
+                    </div>
                     <span>0{cup}</span>
                   </div>
                 ))}
               </div>
-              <div className="notice">Game outcomes and payouts will be handled securely on the server when the game is approved for launch.</div>
+
+              <div className="notice">
+                Game outcomes and payouts will be handled securely on the
+                server when the game is approved for launch.
+              </div>
             </section>
           )}
 
@@ -660,39 +910,73 @@ function App() {
             <section className="dashboard-panel">
               <span className="section-label">YOUR WALLET</span>
               <h2>USD wallet</h2>
-              <div className="wallet-balance-small">{money(balance)} {currency}</div>
-              <p>Your available balance. Deposit requests require administrator verification.</p>
+
+              <div className="wallet-balance-small">
+                {money(balance)} {currency}
+              </div>
+
+              <p>
+                Your available balance. Deposit requests require administrator
+                verification.
+              </p>
 
               <div className="admin-section">
                 <h2>Submit a deposit</h2>
-                <p>Send USDT to the QUADRA address below using the selected network. Submit the request only after the transfer is complete.</p>
+
+                <p>
+                  Send USDT to the QUADRA address below using the selected
+                  network. Submit the request only after the transfer is
+                  complete.
+                </p>
 
                 <form onSubmit={submitDeposit}>
-                  <label htmlFor="deposit-network">Choose deposit network</label>
+                  <label htmlFor="deposit-network">
+                    Choose deposit network
+                  </label>
+
                   <select
                     id="deposit-network"
                     value={depositNetwork}
                     onChange={e => setDepositNetwork(e.target.value)}
                     required
                   >
-                    <option value="Ethereum (ERC20)">Ethereum (ERC20)</option>
-                    <option value="BNB Smart Chain (BEP20)">BNB Smart Chain (BEP20)</option>
+                    <option value="Ethereum (ERC20)">
+                      Ethereum (ERC20)
+                    </option>
+                    <option value="BNB Smart Chain (BEP20)">
+                      BNB Smart Chain (BEP20)
+                    </option>
                   </select>
 
                   <label>Official QUADRA USDT deposit address</label>
+
                   <div className="profile-detail">
-                    <strong style={{ overflowWrap: 'anywhere' }}>{QUADRA_DEPOSIT_ADDRESS}</strong>
-                    <button type="button" className="login-button" onClick={copyDepositAddress}>
+                    <strong style={{ overflowWrap: 'anywhere' }}>
+                      {QUADRA_DEPOSIT_ADDRESS}
+                    </strong>
+
+                    <button
+                      type="button"
+                      className="login-button"
+                      onClick={copyDepositAddress}
+                    >
                       Copy address
                     </button>
                   </div>
-                  {depositCopyMessage && <p role="status">{depositCopyMessage}</p>}
+
+                  {depositCopyMessage && (
+                    <p role="status">{depositCopyMessage}</p>
+                  )}
 
                   <div className="notice">
-                    Important: Use only the network selected above. Ethereum ERC20 and BNB Smart Chain BEP20 are different networks. Sending funds through the wrong network may result in loss of funds.
+                    Important: Use only the network selected above. Ethereum
+                    ERC20 and BNB Smart Chain BEP20 are different networks.
+                    Sending funds through the wrong network may result in
+                    loss of funds.
                   </div>
 
                   <label htmlFor="deposit-amount">Amount in USD</label>
+
                   <input
                     id="deposit-amount"
                     type="number"
@@ -704,6 +988,7 @@ function App() {
                   />
 
                   <label htmlFor="deposit-hash">Transaction hash</label>
+
                   <input
                     id="deposit-hash"
                     value={depositReference}
@@ -712,21 +997,86 @@ function App() {
                     required
                   />
 
-                  <button className="primary-button" disabled={walletActionLoading}>
-                    {walletActionLoading ? 'Submitting...' : 'Submit deposit request'}
+                  <button
+                    className="primary-button"
+                    disabled={walletActionLoading}
+                  >
+                    {walletActionLoading
+                      ? 'Submitting...'
+                      : 'Submit deposit request'}
                   </button>
                 </form>
               </div>
 
               <div className="admin-section">
                 <h2>Request a withdrawal</h2>
-                <p>Network: TRON (TRC20). Your requested amount is reserved while the request is reviewed. You will receive payment only after the administrator sends it.</p>
+
+                <p>
+                  Choose your preferred network and enter your receiving wallet
+                  address. Your requested amount will be reserved while your
+                  request is reviewed.
+                </p>
+
                 <form onSubmit={submitWithdrawal}>
-                  <label>Amount in USD</label>
-                  <input type="number" min="0.01" step="0.01" value={withdrawalAmount} onChange={e => setWithdrawalAmount(e.target.value)} required />
-                  <label>Your TRON (TRC20) wallet address</label>
-                  <input value={withdrawalAddress} onChange={e => setWithdrawalAddress(e.target.value)} placeholder="Enter your USDT TRC20 address" required />
-                  <button className="primary-button" disabled={walletActionLoading}>Submit withdrawal request</button>
+                  <label htmlFor="withdrawal-network">
+                    Withdrawal network
+                  </label>
+
+                  <select
+                    id="withdrawal-network"
+                    value={withdrawalNetwork}
+                    onChange={e => setWithdrawalNetwork(e.target.value)}
+                    required
+                  >
+                    <option value="Ethereum (ERC20)">
+                      Ethereum (ERC20)
+                    </option>
+                    <option value="BNB Smart Chain (BEP20)">
+                      BNB Smart Chain (BEP20)
+                    </option>
+                  </select>
+
+                  <label htmlFor="withdrawal-amount">
+                    Amount in USD
+                  </label>
+
+                  <input
+                    id="withdrawal-amount"
+                    type="number"
+                    min="0.01"
+                    step="0.01"
+                    value={withdrawalAmount}
+                    onChange={e => setWithdrawalAmount(e.target.value)}
+                    required
+                  />
+
+                  <label htmlFor="withdrawal-address">
+                    Your receiving wallet address
+                  </label>
+
+                  <input
+                    id="withdrawal-address"
+                    value={withdrawalAddress}
+                    onChange={e => setWithdrawalAddress(e.target.value)}
+                    placeholder="0x..."
+                    required
+                  />
+
+                  <div className="notice">
+                    Important: Ethereum ERC20 and BNB Smart Chain BEP20 are
+                    different networks. Make sure your receiving wallet
+                    supports the selected network. Sending through the wrong
+                    network may result in loss of funds.
+                  </div>
+
+                  <button
+                    className="primary-button"
+                    disabled={walletActionLoading}
+                  >
+                    {walletActionLoading
+                      ? 'Submitting...'
+                      : 'Submit withdrawal request'}
+                  </button>
                 </form>
               </div>
             </section>
@@ -736,18 +1086,30 @@ function App() {
             <section className="dashboard-panel">
               <span className="section-label">ACCOUNT RECORDS</span>
               <h2>Recent activity</h2>
+
               {transactions.length === 0 ? (
-                <div className="empty-state"><span>—</span><strong>No transactions yet</strong><p>Your financial transaction history will appear here.</p></div>
-              ) : transactions.map(transaction => (
-                <div className="profile-detail" key={transaction.id}>
-                  <div>
-                    <strong>{transaction.type.replace('_', ' ')}</strong>
-                    <p>{transaction.description || transaction.status}</p>
-                    <small>{new Date(transaction.created_at).toLocaleString()}</small>
-                  </div>
-                  <strong>{money(transaction.amount)}</strong>
+                <div className="empty-state">
+                  <span>—</span>
+                  <strong>No transactions yet</strong>
+                  <p>
+                    Your financial transaction history will appear here.
+                  </p>
                 </div>
-              ))}
+              ) : (
+                transactions.map(transaction => (
+                  <div className="profile-detail" key={transaction.id}>
+                    <div>
+                      <strong>{transaction.type.replace('_', ' ')}</strong>
+                      <p>{transaction.description || transaction.status}</p>
+                      <small>
+                        {new Date(transaction.created_at).toLocaleString()}
+                      </small>
+                    </div>
+
+                    <strong>{money(transaction.amount)}</strong>
+                  </div>
+                ))
+              )}
             </section>
           )}
 
@@ -755,8 +1117,16 @@ function App() {
             <section className="dashboard-panel">
               <span className="section-label">GROW WITH QUADRA</span>
               <h2>Your referrals</h2>
-              <div className="referral-stat"><strong>0</strong><span>People referred</span></div>
-              <p>Your referral link and rewards will appear here when the referral system is connected.</p>
+
+              <div className="referral-stat">
+                <strong>0</strong>
+                <span>People referred</span>
+              </div>
+
+              <p>
+                Your referral link and rewards will appear here when the
+                referral system is connected.
+              </p>
             </section>
           )}
 
@@ -764,10 +1134,25 @@ function App() {
             <section className="dashboard-panel">
               <span className="section-label">ACCOUNT SETTINGS</span>
               <h2>Your profile</h2>
-              <div className="profile-detail"><span>Email address</span><strong>{userEmail}</strong></div>
-              <div className="profile-detail"><span>Account currency</span><strong>{currency}</strong></div>
-              <div className="profile-detail"><span>Account type</span><strong>{isAdmin ? 'Administrator' : 'User'}</strong></div>
-              <button className="logout-action" onClick={logout}>Log out of QUADRA</button>
+
+              <div className="profile-detail">
+                <span>Email address</span>
+                <strong>{userEmail}</strong>
+              </div>
+
+              <div className="profile-detail">
+                <span>Account currency</span>
+                <strong>{currency}</strong>
+              </div>
+
+              <div className="profile-detail">
+                <span>Account type</span>
+                <strong>{isAdmin ? 'Administrator' : 'User'}</strong>
+              </div>
+
+              <button className="logout-action" onClick={logout}>
+                Log out of QUADRA
+              </button>
             </section>
           )}
         </div>
@@ -785,12 +1170,37 @@ function App() {
   return (
     <main className="app-shell">
       <header className="navbar">
-        <a className="brand" href="#" onClick={() => resetForm('home')}>QUADRA<span>.</span></a>
-        <nav><a href="#experience">Experience</a><a href="#about">About</a></nav>
+        <a
+          className="brand"
+          href="#"
+          onClick={() => resetForm('home')}
+        >
+          QUADRA<span>.</span>
+        </a>
+
+        <nav>
+          <a href="#experience">Experience</a>
+          <a href="#about">About</a>
+        </nav>
+
         <div className="nav-actions">
-          <button className="login-button" onClick={toggleTheme}>{darkMode ? '☀ Light mode' : '☾ Dark mode'}</button>
-          <button className="login-button" onClick={() => resetForm('login')}>Log in</button>
-          <button className="nav-button" onClick={() => resetForm('signup')}>Create account <span>↗</span></button>
+          <button className="login-button" onClick={toggleTheme}>
+            {darkMode ? '☀ Light mode' : '☾ Dark mode'}
+          </button>
+
+          <button
+            className="login-button"
+            onClick={() => resetForm('login')}
+          >
+            Log in
+          </button>
+
+          <button
+            className="nav-button"
+            onClick={() => resetForm('signup')}
+          >
+            Create account <span>↗</span>
+          </button>
         </div>
       </header>
 
@@ -798,64 +1208,194 @@ function App() {
         <section className="auth-section">
           <div className="auth-card">
             <span className="section-label">WELCOME TO QUADRA</span>
-            <h1>{mode === 'login' ? 'Welcome back.' : mode === 'signup' ? 'Create your account.' : 'Reset your password.'}</h1>
+
+            <h1>
+              {mode === 'login'
+                ? 'Welcome back.'
+                : mode === 'signup'
+                  ? 'Create your account.'
+                  : 'Reset your password.'}
+            </h1>
+
             <p className="auth-description">
-              {mode === 'login' ? 'Sign in to continue your QUADRA experience.' : mode === 'signup' ? 'A new experience begins with your account.' : 'Enter your email to receive password recovery instructions.'}
+              {mode === 'login'
+                ? 'Sign in to continue your QUADRA experience.'
+                : mode === 'signup'
+                  ? 'A new experience begins with your account.'
+                  : 'Enter your email to receive password recovery instructions.'}
             </p>
+
             <form onSubmit={handleAuth}>
               <label htmlFor="email">Email address</label>
-              <input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com" autoComplete="email" required />
+
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                autoComplete="email"
+                required
+              />
+
               {mode !== 'forgot' && (
                 <>
                   <label htmlFor="password">Password</label>
-                  <input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="At least 8 characters" autoComplete={mode === 'login' ? 'current-password' : 'new-password'} minLength={8} required />
+
+                  <input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    placeholder="At least 8 characters"
+                    autoComplete={
+                      mode === 'login' ? 'current-password' : 'new-password'
+                    }
+                    minLength={8}
+                    required
+                  />
                 </>
               )}
+
               {mode === 'signup' && (
                 <>
-                  <label htmlFor="confirm-password">Confirm password</label>
-                  <input id="confirm-password" type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="Enter your password again" autoComplete="new-password" minLength={8} required />
+                  <label htmlFor="confirm-password">
+                    Confirm password
+                  </label>
+
+                  <input
+                    id="confirm-password"
+                    type="password"
+                    value={confirmPassword}
+                    onChange={e => setConfirmPassword(e.target.value)}
+                    placeholder="Enter your password again"
+                    autoComplete="new-password"
+                    minLength={8}
+                    required
+                  />
                 </>
               )}
-              {mode === 'login' && <button type="button" className="forgot-link" onClick={() => resetForm('forgot')}>Forgot password?</button>}
-              <button className="primary-button auth-submit" disabled={loading}>
-                {loading ? 'Please wait...' : mode === 'login' ? 'Log in' : mode === 'signup' ? 'Create account' : 'Send recovery email'} <span>↗</span>
+
+              {mode === 'login' && (
+                <button
+                  type="button"
+                  className="forgot-link"
+                  onClick={() => resetForm('forgot')}
+                >
+                  Forgot password?
+                </button>
+              )}
+
+              <button
+                className="primary-button auth-submit"
+                disabled={loading}
+              >
+                {loading
+                  ? 'Please wait...'
+                  : mode === 'login'
+                    ? 'Log in'
+                    : mode === 'signup'
+                      ? 'Create account'
+                      : 'Send recovery email'}{' '}
+                <span>↗</span>
               </button>
-              {message && <p className="auth-message" role="status">{message}</p>}
+
+              {message && (
+                <p className="auth-message" role="status">
+                  {message}
+                </p>
+              )}
             </form>
+
             <div className="auth-switch">
-              {mode === 'login' ? <>New to QUADRA? <button onClick={() => resetForm('signup')}>Create an account</button></> : <>Already have an account? <button onClick={() => resetForm('login')}>Log in</button></>}
+              {mode === 'login' ? (
+                <>
+                  New to QUADRA?{' '}
+                  <button onClick={() => resetForm('signup')}>
+                    Create an account
+                  </button>
+                </>
+              ) : (
+                <>
+                  Already have an account?{' '}
+                  <button onClick={() => resetForm('login')}>
+                    Log in
+                  </button>
+                </>
+              )}
             </div>
-            <button className="back-home" onClick={() => resetForm('home')}>← Back to homepage</button>
+
+            <button
+              className="back-home"
+              onClick={() => resetForm('home')}
+            >
+              ← Back to homepage
+            </button>
           </div>
         </section>
       ) : (
         <>
           <section className="hero" id="experience">
-            <div className="eyebrow"><span className="status-dot"></span>A NEW KIND OF GAMING EXPERIENCE</div>
-            <h1>Four cups.<br /><span>Infinite possibilities.</span></h1>
-            <p className="hero-description">A refined gaming experience built around simplicity, anticipation and the art of the unexpected.</p>
+            <div className="eyebrow">
+              <span className="status-dot"></span>
+              A NEW KIND OF GAMING EXPERIENCE
+            </div>
+
+            <h1>
+              Four cups.<br />
+              <span>Infinite possibilities.</span>
+            </h1>
+
+            <p className="hero-description">
+              A refined gaming experience built around simplicity,
+              anticipation and the art of the unexpected.
+            </p>
+
             <div className="cup-stage">
               {[1, 2, 3, 4].map(cup => (
                 <div className="cup-item" key={cup}>
                   <div className="cup-shadow"></div>
-                  <div className="cup"><div className="cup-rim"></div><div className="cup-body"><div className="cup-detail"></div></div><div className="cup-base"></div></div>
+
+                  <div className="cup">
+                    <div className="cup-rim"></div>
+                    <div className="cup-body">
+                      <div className="cup-detail"></div>
+                    </div>
+                    <div className="cup-base"></div>
+                  </div>
+
                   <span className="cup-label">0{cup}</span>
                 </div>
               ))}
             </div>
-            <button className="primary-button" onClick={() => resetForm('signup')}>Get started <span>↗</span></button>
-            <p className="hero-note">FOUR CUPS · ONE DISTINCT EXPERIENCE</p>
+
+            <button
+              className="primary-button"
+              onClick={() => resetForm('signup')}
+            >
+              Get started <span>↗</span>
+            </button>
+
+            <p className="hero-note">
+              FOUR CUPS · ONE DISTINCT EXPERIENCE
+            </p>
           </section>
+
           <section className="about-section" id="about">
             <span className="section-label">THE QUADRA PHILOSOPHY</span>
             <h2>Less noise. More anticipation.</h2>
-            <p>Four identical cups. A beautifully simple concept. An experience designed with intention.</p>
+            <p>
+              Four identical cups. A beautifully simple concept. An
+              experience designed with intention.
+            </p>
           </section>
         </>
       )}
 
-      <footer><span className="brand">QUADRA<span>.</span></span><span>© 2026 QUADRA</span></footer>
+      <footer>
+        <span className="brand">QUADRA<span>.</span></span>
+        <span>© 2026 QUADRA</span>
+      </footer>
     </main>
   )
 }
