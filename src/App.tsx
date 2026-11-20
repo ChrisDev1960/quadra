@@ -124,12 +124,12 @@ const [selectedPracticeTile, setSelectedPracticeTile] = useState<number | null>(
   const [loading, setLoading] = useState(false)
 
   const loadPracticeBalance = async () => {
-  setPracticeMessage('Loading practice balance...')
+  setPracticeMessage('Checking saved practice balance...')
 
   const { data: authData, error: authError } = await supabase.auth.getUser()
 
   if (authError || !authData.user) {
-    setPracticeMessage('Unable to identify your account. Please sign in again.')
+    setPracticeMessage('Account verification failed: ' + (authError?.message || 'No user found'))
     return
   }
 
@@ -140,18 +140,24 @@ const [selectedPracticeTile, setSelectedPracticeTile] = useState<number | null>(
     .maybeSingle()
 
   if (error) {
-    setPracticeMessage(`Balance loading failed: ${error.message}`)
+    setPracticeMessage('Database error: ' + error.message)
     return
   }
 
   if (!data) {
-    setPracticeMessage('Practice wallet not found for this account.')
+    setPracticeMessage('No practice wallet found for this account.')
     return
   }
 
-  setPracticeBalance(Number(data.balance))
-    console.log('QUADRA PRACTICE BALANCE:', data.balance)
-  setPracticeMessage('')
+  const savedBalance = Number(data.balance)
+
+  setPracticeBalance(savedBalance)
+  setPracticeMessage(`Database balance loaded: $${savedBalance.toFixed(2)}`)
+
+  console.log('QUADRA DEBUG:', {
+    account: authData.user.id,
+    databaseBalance: data.balance
+  })
 }
 
 const startPracticeRound = async () => {
