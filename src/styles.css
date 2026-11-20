@@ -537,3 +537,305 @@ html[data-theme="dark"] footer {
   background: #20221f;
   color: #f3f0e9;
 }
+
+
+/* QUADRA USER DASHBOARD */
+
+.dashboard-shell {
+  min-height: 100vh;
+  background: #F3F0E9;
+  color: #30332F;
+}
+
+.dashboard-header {
+  min-height: 76px;
+  padding: 18px 6%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(80, 80, 70, .12);
+}
+
+.dashboard-header-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.dashboard-content {
+  max-width: 1050px;
+  width: 90%;
+  margin: 55px auto;
+}
+
+.dashboard-welcome h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(32px, 5vw, 48px);
+  margin: 12px 0;
+}
+
+.dashboard-welcome p {
+  opacity: .65;
+  overflow-wrap: anywhere;
+}
+
+.wallet-card {
+  margin-top: 32px;
+  padding: 32px;
+  border-radius: 22px;
+  background: #30332F;
+  color: #F3F0E9;
+}
+
+.wallet-card > span {
+  font-size: 11px;
+  letter-spacing: 2px;
+  opacity: .7;
+}
+
+.wallet-card h2 {
+  font-size: 42px;
+  margin: 12px 0;
+}
+
+.wallet-card h2 small {
+  font-size: 13px;
+}
+
+.wallet-card p {
+  opacity: .7;
+}
+
+.wallet-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 22px;
+}
+
+.wallet-actions button,
+.dashboard-nav button,
+.logout-action {
+  padding: 11px 17px;
+  border: 1px solid rgba(180, 180, 160, .4);
+  border-radius: 30px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.dashboard-nav {
+  display: flex;
+  gap: 9px;
+  flex-wrap: wrap;
+  margin: 32px 0;
+}
+
+.dashboard-nav button {
+  border-color: rgba(100, 100, 90, .2);
+}
+
+.dashboard-nav .dashboard-nav-active {
+  background: #A8B5A0;
+  color: #20221f;
+  border-color: #A8B5A0;
+}
+
+.dashboard-panel {
+  padding: 30px;
+  background: rgba(255,255,255,.65);
+  border: 1px solid rgba(100,100,90,.12);
+  border-radius: 22px;
+  margin-bottom: 40px;
+}
+
+.dashboard-panel h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 30px;
+  margin: 12px 0;
+}
+
+.dashboard-panel > p {
+  line-height: 1.7;
+  opacity: .75;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 25px;
+}
+
+.dashboard-grid button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 22px;
+  border: 1px solid rgba(100,100,90,.16);
+  border-radius: 17px;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.dashboard-grid button span,
+.dashboard-cup span {
+  color: #A68A5E;
+  font-size: 12px;
+}
+
+.dashboard-grid button strong {
+  font-size: 17px;
+}
+
+.dashboard-grid button small {
+  opacity: .65;
+}
+
+.dashboard-cups {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 15px;
+  margin: 35px 0;
+  text-align: center;
+}
+
+.dashboard-cup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.dashboard-cup .cup {
+  transform: scale(.75);
+  transform-origin: bottom center;
+}
+
+.notice {
+  padding: 17px;
+  border-radius: 13px;
+  background: rgba(166,138,94,.12);
+  line-height: 1.6;
+  font-size: 13px;
+}
+
+.wallet-balance-small {
+  font-size: 36px;
+  font-weight: 600;
+  margin: 25px 0;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 45px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.empty-state > span {
+  font-size: 35px;
+}
+
+.empty-state p {
+  opacity: .65;
+}
+
+.referral-stat {
+  display: flex;
+  flex-direction: column;
+  margin: 25px 0;
+}
+
+.referral-stat strong {
+  font-size: 48px;
+}
+
+.profile-detail {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  padding: 18px 0;
+  border-bottom: 1px solid rgba(100,100,90,.15);
+  overflow-wrap: anywhere;
+}
+
+.logout-action {
+  margin-top: 25px;
+  color: #a34c40;
+}
+
+.dashboard-shell footer {
+  padding: 25px 6%;
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  border-top: 1px solid rgba(80,80,70,.12);
+}
+
+html[data-theme="dark"] .dashboard-shell {
+  background: #20221f;
+  color: #F3F0E9;
+}
+
+html[data-theme="dark"] .dashboard-panel {
+  background: #292c28;
+  border-color: #41453e;
+}
+
+html[data-theme="dark"] .dashboard-grid button {
+  border-color: #41453e;
+}
+
+html[data-theme="dark"] .dashboard-nav button {
+  color: #F3F0E9;
+  border-color: #55594f;
+}
+
+html[data-theme="dark"] .dashboard-nav .dashboard-nav-active {
+  background: #A8B5A0;
+  color: #20221f;
+}
+
+html[data-theme="dark"] .dashboard-header {
+  border-color: #41453e;
+}
+
+@media (max-width: 600px) {
+  .dashboard-content {
+    margin: 32px auto;
+  }
+
+  .dashboard-header {
+    padding: 16px 5%;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-panel {
+    padding: 22px;
+  }
+
+  .dashboard-nav {
+    gap: 7px;
+  }
+
+  .dashboard-nav button {
+    padding: 9px 12px;
+    font-size: 12px;
+  }
+
+  .wallet-card {
+    padding: 25px;
+  }
+
+  .dashboard-cups {
+    gap: 0;
+  }
+}
+
