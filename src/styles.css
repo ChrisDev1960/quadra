@@ -1771,3 +1771,54 @@ textarea:focus-visible {
     font-size: 8px;
   }
 }
+
+/* QUADRA home page finishing adjustments */
+
+/* Welcome heading: smaller and not bold */
+.dashboard-welcome h1 {
+  font-size: 24px !important;
+  font-weight: 400 !important;
+  line-height: 1.3;
+  letter-spacing: -0.5px;
+  margin-top: 0;
+}
+
+/* Centre the entire game feature copy */
+.game-feature-copy {
+  text-align: center;
+}
+
+.game-feature-copy > .section-label {
+  display: block;
+  text-align: center;
+}
+
+.game-feature-copy .primary-button {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Centre the overview heading while keeping ACCOUNT on the right */
+.overview-panel .panel-heading {
+  position: relative;
+  justify-content: center;
+}
+
+.overview-panel .panel-heading > div {
+  flex: 1;
+  text-align: center;
+}
+
+.overview-panel .panel-heading .soft-tag {
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+@media (max-width: 600px) {
+  .dashboard-welcome h1 {
+    font-size: 21px !important;
+    font-weight: 400 !important;
+  }
+}
