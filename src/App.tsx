@@ -851,7 +851,7 @@ const selectPracticeTile = async (tile: number) => {
       <small>{currency}</small>
     </div>
 
-    <div className="wallet-actions">
+    <div className="wallet-main-actions">
       <button
         className="primary-button"
         onClick={() => openWalletPage('deposit')}
