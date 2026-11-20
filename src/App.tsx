@@ -645,126 +645,169 @@ const selectPracticeTile = async (tile: number) => {
             </>
           )}
 
-          {tab === 'play' && (
-            <section className="dashboard-panel mines-panel">
-              <div className="panel-heading">
-                <div>
-                  <span className="section-label">QUADRA ORIGINAL</span>
-                  <h2>Mines.</h2>
-                  <p>Four tiles. One selection per round.</p>
-                </div>
-                <span className="preview-tag">PREVIEW</span>
-              </div>
+         {tab === 'play' && (
+  <section className="dashboard-panel mines-panel">
+    <div className="panel-heading">
+      <div>
+        <span className="section-label">QUADRA ORIGINAL</span>
+        <h2>Mines.</h2>
+        <p>Four tiles. One selection per round.</p>
+      </div>
+      <span className="preview-tag">PRACTICE MODE</span>
+    </div>
 
-              <div className="game-status-row">
-                <span>GAME BOARD</span>
-                <span className="status-indicator"><i /> Demo interface</span>
-              </div>
+    <div className="game-status-row">
+      <span>GAME BOARD</span>
+      <span className="status-indicator"><i /> Virtual credits only</span>
+    </div>
 
-              <div className="mines-board-wrap">
-                <div className="mines-board">
-                  {[1, 2, 3, 4].map(number => (
-                    <button className="mine-tile" disabled aria-label={`Tile ${number}`} key={number}>
-                      <span className="tile-symbol">✦</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
+    <div className="control-summary">
+      <span>PRACTICE BALANCE</span>
+      <strong>{money(practiceBalance)}</strong>
+    </div>
 
-              <div className="game-controls-preview">
-                <div className="control-summary">
-                  <span>BET AMOUNT</span>
-                  <strong>$1.00</strong>
-                </div>
-                <div className="control-summary">
-                  <span>SELECTIONS</span>
-                  <strong>1 tile</strong>
-                </div>
-              </div>
+    <div className="mines-board-wrap">
+      <div className="mines-board">
+        {[0, 1, 2, 3].map(tile => (
+          <button
+            className={`mine-tile practice-tile ${selectedPracticeTile === tile ? 'practice-tile-selected' : ''}`}
+            disabled={!practiceRoundId || practiceBusy || !!practiceResult}
+            aria-label={`Tile ${tile + 1}`}
+            key={tile}
+            onClick={() => selectPracticeTile(tile)}
+          >
+            <span className="tile-symbol">
+              {selectedPracticeTile === tile
+                ? practiceResult === 'won' ? '✦' : practiceResult === 'lost' ? '×' : '✦'
+                : '✦'}
+            </span>
+          </button>
+        ))}
+      </div>
+    </div>
 
-              <button className="primary-button game-disabled-button" disabled>Game coming soon</button>
+    <div className="game-controls-preview">
+      <label className="control-summary">
+        <span>PRACTICE STAKE (USD)</span>
+        <input
+          type="number"
+          min="0.01"
+          step="0.01"
+          max={practiceBalance}
+          value={practiceStake}
+          disabled={!!practiceRoundId || practiceBusy}
+          onChange={e => setPracticeStake(e.target.value)}
+        />
+      </label>
+      <div className="control-summary">
+        <span>SELECTIONS</span>
+        <strong>1 tile</strong>
+      </div>
+    </div>
 
-              <div className="notice">
-                This is a visual preview only. No tile can be selected, no bet is placed and no game outcome or payout is generated. The secure game engine is not connected yet.
-              </div>
+    {!practiceRoundId && !practiceResult && (
+      <button
+        className="primary-button"
+        onClick={startPracticeRound}
+        disabled={practiceBusy || practiceBalance <= 0}
+      >
+        {practiceBusy ? 'Starting...' : 'Start practice round'}
+      </button>
+    )}
 
-              <div className="auto-bet-panel">
-                <div className="panel-heading">
-                  <div>
-                    <span className="section-label">PLAY SETTINGS</span>
-                    <h2>Auto Bet.</h2>
-                  </div>
-                  <span className="preview-tag">NOT ACTIVE</span>
-                </div>
+    {practiceRoundId && (
+      <p className="notice">Choose exactly one tile to finish your round.</p>
+    )}
 
-                <p className="auto-description">Set your preferences now. These settings are saved on this device for when the feature is ready.</p>
-
-                <div className="auto-settings-grid">
-                  <label>
-                    Stake per round (USD)
-                    <input type="number" min="0.01" step="0.01" value={autoSettings.stake}
-                      onChange={e => updateAutoSetting('stake', e.target.value)} />
-                  </label>
-                  <label>
-                    Number of rounds
-                    <input type="number" min="1" max="1000" step="1" value={autoSettings.rounds}
-                      onChange={e => updateAutoSetting('rounds', e.target.value)} />
-                  </label>
-                  <label>
-                    Stop on profit (USD)
-                    <input type="number" min="0" step="0.01" value={autoSettings.stopProfit}
-                      onChange={e => updateAutoSetting('stopProfit', e.target.value)} />
-                  </label>
-                  <label>
-                    Stop on loss (USD)
-                    <input type="number" min="0" step="0.01" value={autoSettings.stopLoss}
-                      onChange={e => updateAutoSetting('stopLoss', e.target.value)} />
-                  </label>
-                </div>
-
-                <div className="auto-toggle-list">
-                  <label className="toggle-row">
-                    <span><strong>Stop if a round wins</strong><small>Pause after a winning round</small></span>
-                    <input type="checkbox" checked={autoSettings.stopOnWin}
-                      onChange={e => updateAutoSetting('stopOnWin', e.target.checked)} />
-                  </label>
-                  <label className="toggle-row">
-                    <span><strong>Stop if a round loses</strong><small>Pause after a losing round</small></span>
-                    <input type="checkbox" checked={autoSettings.stopOnLoss}
-                      onChange={e => updateAutoSetting('stopOnLoss', e.target.checked)} />
-                  </label>
-                </div>
-
-                {autoSettingsMessage && <p className="settings-saved">{autoSettingsMessage}</p>}
-
-                <button className="secondary-button" onClick={() => {
-                  setAutoSettings(defaultAutoSettings)
-                  setAutoSettingsMessage('Default settings restored.')
-                }}>Reset settings</button>
-
-                <button className="primary-button auto-disabled-button" disabled>Auto Bet unavailable until launch</button>
-              </div>
-            </section>
+    {practiceResult && (
+      <>
+        <div className="notice" role="status">
+          {practiceMessage}
+          {practiceResult === 'won' && (
+            <p>Payout: {money(practicePayout)}</p>
           )}
+        </div>
+        <button
+          className="primary-button"
+          onClick={startPracticeRound}
+          disabled={practiceBusy}
+        >
+          {practiceBusy ? 'Please wait...' : 'Play another practice round'}
+        </button>
+      </>
+    )}
 
-          {tab === 'wallet' && walletPage === 'main' && (
-            <section className="dashboard-panel">
-              <span className="section-label">YOUR WALLET</span>
-              <h2>USD wallet.</h2>
-              <div className="wallet-balance-small">
-                {money(balance)} <small>{currency}</small>
-              </div>
-              <p>{walletLoading ? 'Updating your wallet...' : 'Your available QUADRA balance.'}</p>
+    {practiceMessage && !practiceResult && !practiceRoundId && (
+      <div className="notice" role="status">{practiceMessage}</div>
+    )}
 
-              {walletMessage && <div className="notice" role="status">{walletMessage}</div>}
+    <div className="notice">
+      Practice mode uses virtual credits only. It does not use your real wallet, accept deposits or generate withdrawable winnings.
+    </div>
 
-              <div className="wallet-actions wallet-page-actions">
-                <button className="wallet-primary-action" onClick={() => openWalletPage('deposit')}>Deposit</button>
-                <button onClick={() => openWalletPage('withdraw')}>Withdraw</button>
-                <button onClick={() => navigate('activity')}>Activity</button>
-              </div>
-            </section>
-          )}
+    <div className="auto-bet-panel">
+      <div className="panel-heading">
+        <div>
+          <span className="section-label">PLAY SETTINGS</span>
+          <h2>Auto Bet.</h2>
+        </div>
+        <span className="preview-tag">NOT ACTIVE</span>
+      </div>
+
+      <p className="auto-description">
+        Set your preferences now. These settings are saved on this device for when the feature is ready.
+      </p>
+
+      <div className="auto-settings-grid">
+        <label>
+          Stake per round (USD)
+          <input type="number" min="0.01" step="0.01" value={autoSettings.stake}
+            onChange={e => updateAutoSetting('stake', e.target.value)} />
+        </label>
+        <label>
+          Number of rounds
+          <input type="number" min="1" max="1000" step="1" value={autoSettings.rounds}
+            onChange={e => updateAutoSetting('rounds', e.target.value)} />
+        </label>
+        <label>
+          Stop on profit (USD)
+          <input type="number" min="0" step="0.01" value={autoSettings.stopProfit}
+            onChange={e => updateAutoSetting('stopProfit', e.target.value)} />
+        </label>
+        <label>
+          Stop on loss (USD)
+          <input type="number" min="0" step="0.01" value={autoSettings.stopLoss}
+            onChange={e => updateAutoSetting('stopLoss', e.target.value)} />
+        </label>
+      </div>
+
+      <div className="auto-toggle-list">
+        <label className="toggle-row">
+          <span><strong>Stop if a round wins</strong><small>Pause after a winning round</small></span>
+          <input type="checkbox" checked={autoSettings.stopOnWin}
+            onChange={e => updateAutoSetting('stopOnWin', e.target.checked)} />
+        </label>
+        <label className="toggle-row">
+          <span><strong>Stop if a round loses</strong><small>Pause after a losing round</small></span>
+          <input type="checkbox" checked={autoSettings.stopOnLoss}
+            onChange={e => updateAutoSetting('stopOnLoss', e.target.checked)} />
+        </label>
+      </div>
+
+      {autoSettingsMessage && <p className="settings-saved">{autoSettingsMessage}</p>}
+
+      <button className="secondary-button" onClick={() => {
+        setAutoSettings(defaultAutoSettings)
+        setAutoSettingsMessage('Default settings restored.')
+      }}>Reset settings</button>
+
+      <button className="primary-button auto-disabled-button" disabled>
+        Auto Bet unavailable until launch
+      </button>
+    </div>
+  </section>
+)}
+
 
           {tab === 'wallet' && walletPage === 'deposit' && (
             <section className="dashboard-panel">
