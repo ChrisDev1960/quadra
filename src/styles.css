@@ -1721,3 +1721,53 @@ textarea:focus-visible {
     animation-duration: .01ms !important;
   }
 }
+/* Compact balance display on Home and Mines */
+.top-balance-compact {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: auto;
+  min-width: 0;
+  padding: 7px 11px;
+  border-radius: 10px;
+  white-space: nowrap;
+  box-shadow: 0 2px 7px rgba(0, 0, 0, 0.07);
+}
+
+.top-balance-compact span {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.top-balance-compact strong {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.top-balance-compact small {
+  font-size: 9px;
+  margin: 0;
+}
+
+@media (max-width: 600px) {
+  .top-balance-compact {
+    padding: 6px 9px;
+    gap: 4px;
+  }
+
+  .top-balance-compact span {
+    font-size: 9px;
+  }
+
+  .top-balance-compact strong {
+    font-size: 11px;
+  }
+
+  .top-balance-compact small {
+    font-size: 8px;
+  }
+}
