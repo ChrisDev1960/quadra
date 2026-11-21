@@ -1,5 +1,5 @@
 
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { supabase } from './lib/supabase'
 
 const QUADRA_DEPOSIT_ADDRESS = '0xe801e50631c03a1aaf2d30bb1f2f196864db58a5'
