@@ -637,7 +637,7 @@ const selectPracticeTile = async (tile: number) => {
 
     <div className="game-status-row">
       <span>GAME BOARD</span>
-      <span className="status-indicator"><i /> Virtual credits only</span>
+      <span className="status-indicator"><i /></span>
     </div>
 
     <div className="control-summary">
