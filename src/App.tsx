@@ -938,9 +938,26 @@ const stopAutoBet = () => {
         setAutoSettingsMessage('Default settings restored.')
       }}>Reset settings</button>
 
-      <button className="primary-button auto-disabled-button" disabled>
-        Auto Bet unavailable until launch
-      </button>
+      {autoMessage && (
+  <p className="notice" role="status">{autoMessage}</p>
+)}
+
+{!autoRunning ? (
+  <button
+    className="primary-button"
+    onClick={startAutoBet}
+    disabled={!!practiceRoundId || practiceBusy || balance <= 0}
+  >
+    Start Auto Bet
+  </button>
+) : (
+  <button
+    className="secondary-button"
+    onClick={stopAutoBet}
+  >
+    Stop Auto Bet
+  </button>
+)}
     </div>
   </section>
 )}
