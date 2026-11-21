@@ -689,7 +689,7 @@ const selectPracticeTile = async (tile: number) => {
           type="number"
           min="0.01"
           step="0.01"
-          max={practiceBalance}
+          max={balance}
           value={practiceStake}
           disabled={!!practiceRoundId || practiceBusy}
           onChange={e => setPracticeStake(e.target.value)}
