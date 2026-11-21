@@ -198,11 +198,12 @@ const loadAccountData = async (id: string) => {
 
   try {
     const [
-      walletResult,
-      transactionResult,
-      adminResult,
-      activeRoundResult
-    ] = await Promise.all([
+  walletResult,
+  transactionResult,
+  profileResult,
+  adminResult,
+  activeRoundResult
+] = await Promise.all([
       supabase.from('wallets')
         .select('balance, currency')
         .eq('user_id', id)
