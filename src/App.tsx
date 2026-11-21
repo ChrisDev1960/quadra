@@ -633,7 +633,7 @@ const selectPracticeTile = async (tile: number) => {
         <h2>Mines.</h2>
         <p>Four tiles. One selection per round.</p>
       </div>
-      <span className="preview-tag">PRACTICE MODE</span>
+      <span className="preview-tag"></span>
     </div>
 
     <div className="game-status-row">
