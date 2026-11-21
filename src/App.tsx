@@ -235,13 +235,16 @@ const loadAccountData = async (id: string) => {
     if (transactionResult.error) throw transactionResult.error
     if (profileResult.error) throw profileResult.error
 setMyReferralCode(profileResult.data?.referral_code || '')
-    const { count, error: referralCountError } = await supabase
-  .from('referrals')
-  .select('id', { count: 'exact', head: true })
-  .eq('referrer_id', id)
+    const { data: referralStats, error: referralStatsError } =
+  await supabase.rpc('get_referral_stats')
 
-if (!referralCountError) {
-  setReferralCount(count || 0)
+if (!referralStatsError && referralStats) {
+  const stats = Array.isArray(referralStats)
+    ? referralStats[0]
+    : referralStats
+
+  setReferralCount(Number(stats.total_referrals || 0))
+  setDepositedReferralCount(Number(stats.deposited_referrals || 0))
 }
 
     if (!walletResult.data) {
