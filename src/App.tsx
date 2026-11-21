@@ -170,14 +170,15 @@ const selectPracticeTile = async (tile: number) => {
 
     setPracticeResult(result.round_status)
     setPracticePayout(Number(result.payout))
-    setPracticeBalance((current) =>
-      Number((current + Number(result.payout)).toFixed(2))
-    )
+
+    await loadAccountData(userId)
+
     setPracticeMessage(
       result.round_status === 'won'
-        ? `You won $${Number(result.payout).toFixed(2)} in practice credits!`
-        : 'Not this time. Your practice stake was lost.'
+        ? `You won $${Number(result.payout).toFixed(2)}!`
+        : 'Not this time. Your stake was lost.',
     )
+
     setPracticeRoundId('')
   }
 
