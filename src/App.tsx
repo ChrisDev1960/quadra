@@ -707,7 +707,7 @@ const selectPracticeTile = async (tile: number) => {
         onClick={startPracticeRound}
         disabled={practiceBusy || practiceBalance <= 0}
       >
-        {practiceBusy ? 'Starting...' : 'Start practice round'}
+        {practiceBusy ? 'Starting...' : 'Start round'}
       </button>
     )}
 
