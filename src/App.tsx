@@ -878,7 +878,7 @@ const stopAutoBet = () => {
 
    {!practiceResult && !practiceRoundId && (
   <div className="notice" role="status">
-    {practiceMessage || 'Practice balance is waiting to load.'}
+    {practiceMessage || 'Ready when you are.'}
   </div>
 )}
 
