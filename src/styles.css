@@ -1838,3 +1838,107 @@ textarea:focus-visible {
   margin: 0;
   box-sizing: border-box;
 }
+/* ==============================
+   QUADRA — MINES PRACTICE REVEAL
+   Safe visual-only additions
+============================== */
+
+/* Keep the existing four-tile layout and give playable tiles a tactile feel. */
+.mines-board .practice-tile {
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform .22s cubic-bezier(.2,.8,.2,1),
+    background .28s ease,
+    border-color .28s ease,
+    box-shadow .28s ease;
+}
+
+/* Only active practice tiles respond to hover and press. */
+.mines-board .practice-tile:not(:disabled):hover {
+  z-index: 1;
+  transform: translateY(-2px);
+  border-color: rgba(119, 138, 112, .48);
+  box-shadow:
+    inset 1px 1px 2px rgba(255,255,255,.95),
+    inset -2px -2px 5px rgba(65,69,59,.07),
+    0 5px 12px rgba(65, 79, 58, .10);
+}
+
+.mines-board .practice-tile:not(:disabled):active {
+  transform: scale(.965);
+}
+
+.mines-board .practice-tile:disabled {
+  cursor: default;
+}
+
+/* The selected tile lifts gently as its result is revealed. */
+.mines-board .practice-tile.practice-tile-selected {
+  z-index: 2;
+  border-color: rgba(119, 138, 112, .55);
+  background: linear-gradient(145deg, #F8FAF5, #DDE6D8);
+  box-shadow:
+    inset 1px 1px 2px rgba(255,255,255,.95),
+    inset -2px -2px 5px rgba(65,69,59,.06),
+    0 0 0 3px rgba(119, 138, 112, .10),
+    0 7px 16px rgba(65, 79, 58, .12);
+  animation: quadraMineTileReveal .42s cubic-bezier(.2,.8,.2,1) both;
+}
+
+.mines-board .practice-tile.practice-tile-selected .tile-symbol {
+  display: inline-grid;
+  place-items: center;
+  opacity: 1;
+  color: #718568;
+  font-size: 30px;
+  text-shadow: 0 2px 8px rgba(83, 99, 76, .20);
+  animation: quadraMineSymbolReveal .38s cubic-bezier(.16,1,.3,1) .06s both;
+}
+
+@keyframes quadraMineTileReveal {
+  0% {
+    transform: scale(.94);
+    filter: brightness(.96);
+  }
+  65% {
+    transform: scale(1.025);
+    filter: brightness(1.035);
+  }
+  100% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+}
+
+@keyframes quadraMineSymbolReveal {
+  0% {
+    opacity: 0;
+    transform: scale(.35) rotate(-18deg);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.12) rotate(4deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+}
+
+/* Keep keyboard focus visible without changing the board geometry. */
+.mines-board .practice-tile:focus-visible {
+  z-index: 3;
+  outline: 2px solid var(--sage-deep);
+  outline-offset: -4px;
+}
+
+/* Respect the device's reduced-motion preference. */
+@media (prefers-reduced-motion: reduce) {
+  .mines-board .practice-tile.practice-tile-selected,
+  .mines-board .practice-tile.practice-tile-selected .tile-symbol {
+    animation: none !important;
+  }
+}
