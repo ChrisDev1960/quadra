@@ -832,7 +832,7 @@ const stopAutoBet = () => {
           step="0.01"
           max={balance}
           value={practiceStake}
-          disabled={!!practiceRoundId || practiceBusy}
+          disabled={!!practiceRoundId || practiceBusy || autoRunning}
           onChange={e => setPracticeStake(e.target.value)}
         />
       </label>
