@@ -690,22 +690,38 @@ const selectPracticeTile = async (tile: number) => {
 
     <div className="mines-board-wrap">
       <div className="mines-board">
-        {[0, 1, 2, 3].map(tile => (
-          <button
-            className={`mine-tile practice-tile ${selectedPracticeTile === tile ? 'practice-tile-selected' : ''}`}
-            disabled={!practiceRoundId || practiceBusy || !!practiceResult}
-            aria-label={`Tile ${tile + 1}`}
-            key={tile}
-            onClick={() => selectPracticeTile(tile)}
-          >
-            <span className="tile-symbol">
-              {selectedPracticeTile === tile
-                ? practiceResult === 'won' ? '✦' : practiceResult === 'lost' ? '×' : '✦'
-                : '✦'}
-            </span>
-          </button>
-        ))}
-      </div>
+  {[0, 1, 2, 3].map(tile => (
+    <button
+      className={`mine-tile practice-tile ${
+        selectedPracticeTile === tile
+          ? `practice-tile-selected ${
+              practiceResult === 'won'
+                ? 'practice-tile-won'
+                : practiceResult === 'lost'
+                  ? 'practice-tile-lost'
+                  : ''
+            }`
+          : ''
+      }`}
+      disabled={!practiceRoundId || practiceBusy || !!practiceResult}
+      aria-label={`Tile ${tile + 1}`}
+      key={tile}
+      onClick={() => selectPracticeTile(tile)}
+    >
+      <span className="tile-symbol">
+        {selectedPracticeTile === tile && practiceResult === 'lost'
+          ? '✹'
+          : '✦'}
+      </span>
+
+      {selectedPracticeTile === tile && practiceResult && (
+        <span className="tile-result-multiplier">
+          {practiceResult === 'won' ? '5.00x' : '0.00x'}
+        </span>
+      )}
+    </button>
+  ))}
+</div>
     </div>
 
     <div className="game-controls-preview">
