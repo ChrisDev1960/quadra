@@ -398,15 +398,19 @@ if (referralCode) {
           setUserId(data.user?.id || '')
           setUserEmail(data.user?.email || email)
           navigate('overview')
-          const pendingReferral = localStorage.getItem('quadra_pending_referral')
+          const codeToUse = referralCode.trim() ||
+  localStorage.getItem('quadra_pending_referral') || ''
 
-if (pendingReferral) {
+if (codeToUse) {
   const { error: referralError } = await supabase.rpc('record_referral', {
-    p_referral_code: pendingReferral,
+    p_referral_code: codeToUse.toUpperCase(),
   })
 
   if (!referralError) {
     localStorage.removeItem('quadra_pending_referral')
+    setReferralCode('')
+  } else {
+    console.error('Referral recording failed:', referralError.message)
   }
 }
         }
