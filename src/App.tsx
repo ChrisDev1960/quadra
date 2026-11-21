@@ -802,7 +802,7 @@ const stopAutoBet = () => {
             }`
           : ''
       }`}
-      disabled={!practiceRoundId || practiceBusy || !!practiceResult}
+      disabled={!practiceRoundId || practiceBusy || !!practiceResult || autoRunning}
       aria-label={`Tile ${tile + 1}`}
       key={tile}
       onClick={() => selectPracticeTile(tile)}
