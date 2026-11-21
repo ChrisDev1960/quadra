@@ -769,7 +769,7 @@ const stopAutoBet = () => {
           )}
 
          {tab === 'play' && (
-  <section className="dashboard-panel mines-panel">
+  <section ref={minesSectionRef} className="dashboard-panel mines-panel">
     <div className="panel-heading">
       <div>
         <span className="section-label">QUADRA ORIGINAL</span>
