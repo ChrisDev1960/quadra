@@ -378,13 +378,13 @@ const loadAccountData = async (id: string) => {
 
     try {
       if (mode === 'signup') {
-        const referralCode = new URLSearchParams(window.location.search)
+        const urlReferralCode = new URLSearchParams(window.location.search)
   .get('ref')
   ?.trim()
   .toUpperCase()
 
-if (referralCode) {
-  localStorage.setItem('quadra_pending_referral', referralCode)
+if (urlReferralCode) {
+  localStorage.setItem('quadra_pending_referral', urlReferralCode)
 }
         const { data, error } = await supabase.auth.signUp({
           email,
