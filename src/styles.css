@@ -1942,3 +1942,73 @@ textarea:focus-visible {
     animation: none !important;
   }
 }
+
+/* QUADRA MINES — WIN AND LOSS REVEAL */
+
+.mines-board .practice-tile.practice-tile-selected {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  animation: quadraMineTileReveal .42s cubic-bezier(.2,.8,.2,1) both;
+}
+
+.mines-board .practice-tile.practice-tile-won {
+  background: linear-gradient(145deg, #35D879, #159B50) !important;
+  border: 1px solid rgba(255,255,255,.5);
+  box-shadow:
+    inset 0 1px 2px rgba(255,255,255,.35),
+    0 0 0 3px rgba(34,197,94,.14),
+    0 8px 24px rgba(22,163,74,.28);
+}
+
+.mines-board .practice-tile.practice-tile-lost {
+  background: linear-gradient(145deg, #FF6868, #D92D38) !important;
+  border: 1px solid rgba(255,255,255,.4);
+  box-shadow:
+    inset 0 1px 2px rgba(255,255,255,.3),
+    0 0 0 3px rgba(239,68,68,.13),
+    0 8px 24px rgba(220,38,38,.25);
+}
+
+.mines-board .practice-tile.practice-tile-won .tile-symbol {
+  color: #FFFFFF !important;
+  font-size: 34px;
+  opacity: 1;
+  text-shadow: 0 2px 10px rgba(0,0,0,.18);
+}
+
+.mines-board .practice-tile.practice-tile-lost .tile-symbol {
+  color: #FFFFFF !important;
+  font-size: 34px;
+  opacity: 1;
+  text-shadow: 0 2px 10px rgba(0,0,0,.2);
+}
+
+.tile-result-multiplier {
+  color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: .4px;
+  line-height: 1;
+  text-shadow: 0 1px 5px rgba(0,0,0,.2);
+  animation: quadraMultiplierReveal .35s cubic-bezier(.16,1,.3,1) .12s both;
+}
+
+@keyframes quadraMultiplierReveal {
+  from {
+    opacity: 0;
+    transform: translateY(7px) scale(.8);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tile-result-multiplier {
+    animation: none !important;
+  }
+}
