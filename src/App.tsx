@@ -215,6 +215,11 @@ const loadAccountData = async (id: string) => {
         .order('created_at', { ascending: false })
         .limit(20),
 
+    supabase.from('profiles')
+  .select('referral_code')
+  .eq('id', id)
+  .maybeSingle(),
+
       supabase.rpc('is_quadra_admin'),
 
       supabase.from('mines_practice_rounds')
