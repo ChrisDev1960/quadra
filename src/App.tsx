@@ -1312,6 +1312,19 @@ const stopAutoBet = () => {
                 <label htmlFor="confirm-password">Confirm password</label>
                 <input id="confirm-password" type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="Enter your password again" autoComplete="new-password" minLength={8} required />
               </>}
+              {mode === 'signup' && (
+  <>
+    <label htmlFor="referralCode">Got a referral code? (Optional)</label>
+    <input
+      id="referralCode"
+      type="text"
+      value={referralCode}
+      onChange={e => setReferralCode(e.target.value.toUpperCase())}
+      placeholder="Enter referral code"
+      autoComplete="off"
+    />
+  </>
+)}
 
               {mode === 'login' && <button type="button" className="forgot-link" onClick={() => resetForm('forgot')}>Forgot password?</button>}
 
