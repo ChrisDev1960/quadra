@@ -711,7 +711,9 @@ const selectPracticeTile = async (tile: number) => {
     )}
 
     {practiceRoundId && (
-      <p className="notice">Choose exactly one tile to finish your round.</p>
+      <p className="notice" role="status">
+  {practiceMessage || 'Choose exactly one tile to finish your round.'}
+</p>
     )}
 
     {practiceResult && (
