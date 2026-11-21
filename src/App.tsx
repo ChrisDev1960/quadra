@@ -704,7 +704,7 @@ const selectPracticeTile = async (tile: number) => {
       <button
         className="primary-button"
         onClick={startPracticeRound}
-        disabled={practiceBusy || practiceBalance <= 0}
+        disabled={practiceBusy || balance <= 0}
       >
         {practiceBusy ? 'Starting...' : 'Start round'}
       </button>
