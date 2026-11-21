@@ -642,7 +642,7 @@ const selectPracticeTile = async (tile: number) => {
 
     <div className="control-summary">
       <span>AVAILABLE BALANCE</span>
-      <strong>{money(Balance)}</strong>
+      <strong>{money(balance)}</strong>
     </div>
 
     <div className="mines-board-wrap">
