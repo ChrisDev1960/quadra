@@ -121,6 +121,7 @@ const [practicePayout, setPracticePayout] = useState(0)
 const [selectedPracticeTile, setSelectedPracticeTile] = useState<number | null>(null)
 
   const [email, setEmail] = useState('')
+  const [referralCode, setReferralCode] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [message, setMessage] = useState('')
