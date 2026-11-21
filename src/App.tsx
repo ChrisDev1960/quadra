@@ -397,6 +397,17 @@ if (referralCode) {
           setUserId(data.user?.id || '')
           setUserEmail(data.user?.email || email)
           navigate('overview')
+          const pendingReferral = localStorage.getItem('quadra_pending_referral')
+
+if (pendingReferral) {
+  const { error: referralError } = await supabase.rpc('record_referral', {
+    p_referral_code: pendingReferral,
+  })
+
+  if (!referralError) {
+    localStorage.removeItem('quadra_pending_referral')
+  }
+}
         }
 
         setMessage(data.session
