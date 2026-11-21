@@ -185,43 +185,71 @@ const selectPracticeTile = async (tile: number) => {
   setPracticeBusy(false)
 }
 
-  const loadAccountData = async (id: string) => {
-    setWalletLoading(true)
-    setWalletMessage('')
+  
+const loadAccountData = async (id: string) => {
+  setWalletLoading(true)
+  setWalletMessage('')
 
-    try {
-      const [walletResult, transactionResult, adminResult] = await Promise.all([
-        supabase.from('wallets').select('balance, currency').eq('user_id', id).maybeSingle(),
-        supabase.from('wallet_transactions')
-          .select('id, type, amount, status, description, created_at')
-          .eq('user_id', id)
-          .order('created_at', { ascending: false })
-          .limit(20),
-        supabase.rpc('is_quadra_admin')
-      ])
+  try {
+    const [
+      walletResult,
+      transactionResult,
+      adminResult,
+      activeRoundResult
+    ] = await Promise.all([
+      supabase.from('wallets')
+        .select('balance, currency')
+        .eq('user_id', id)
+        .maybeSingle(),
 
-      if (walletResult.error) throw walletResult.error
-      if (transactionResult.error) throw transactionResult.error
+      supabase.from('wallet_transactions')
+        .select('id, type, amount, status, description, created_at')
+        .eq('user_id', id)
+        .order('created_at', { ascending: false })
+        .limit(20),
 
-      if (!walletResult.data) {
-        setBalance(0)
-        setWalletMessage('Your wallet is being prepared. Please refresh shortly.')
-      } else {
-        setBalance(Number(walletResult.data.balance))
-        setCurrency(walletResult.data.currency)
-      }
+      supabase.rpc('is_quadra_admin'),
 
-      setTransactions(transactionResult.data || [])
-      setIsAdmin(adminResult.data === true)
+      supabase.from('mines_practice_rounds')
+        .select('id')
+        .eq('user_id', id)
+        .eq('status', 'active')
+        .maybeSingle()
+    ])
 
-      if (adminResult.error) console.error('Admin check failed:', adminResult.error.message)
-    } catch (error) {
-      console.error('Account data error:', error)
-      setWalletMessage(error instanceof Error ? error.message : 'Unable to load wallet data.')
-    } finally {
-      setWalletLoading(false)
+    if (walletResult.error) throw walletResult.error
+    if (transactionResult.error) throw transactionResult.error
+
+    if (!walletResult.data) {
+      setBalance(0)
+      setWalletMessage('Your wallet is being prepared. Please refresh shortly.')
+    } else {
+      setBalance(Number(walletResult.data.balance))
+      setCurrency(walletResult.data.currency)
     }
+
+    setTransactions(transactionResult.data || [])
+    setIsAdmin(adminResult.data === true)
+
+    if (activeRoundResult.error) {
+      console.error('Active round recovery failed:', activeRoundResult.error.message)
+    } else {
+      setPracticeRoundId(activeRoundResult.data?.id || '')
+    }
+
+    if (adminResult.error) {
+      console.error('Admin check failed:', adminResult.error.message)
+    }
+  } catch (error) {
+    console.error('Account data error:', error)
+    setWalletMessage(
+      error instanceof Error ? error.message : 'Unable to load wallet data.'
+    )
+  } finally {
+    setWalletLoading(false)
   }
+}
+
 
   const loadAdminData = async () => {
     setAdminLoading(true)
