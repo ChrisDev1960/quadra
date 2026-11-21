@@ -108,7 +108,6 @@ function App() {
     }
   })
   const [autoSettingsMessage, setAutoSettingsMessage] = useState('')
-  const [practiceBalance, setPracticeBalance] = useState(100)
 const [practiceStake, setPracticeStake] = useState('1.00')
 const [practiceRoundId, setPracticeRoundId] = useState('')
 const [practiceBusy, setPracticeBusy] = useState(false)
@@ -123,53 +122,16 @@ const [selectedPracticeTile, setSelectedPracticeTile] = useState<number | null>(
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const loadPracticeBalance = async () => {
-  setPracticeMessage('Checking saved practice balance...')
-
-  const { data: authData, error: authError } = await supabase.auth.getUser()
-
-  if (authError || !authData.user) {
-    setPracticeMessage('Account verification failed: ' + (authError?.message || 'No user found'))
-    return
-  }
-
-  const { data, error } = await supabase
-    .from('mines_practice_wallets')
-    .select('balance')
-    .eq('user_id', authData.user.id)
-    .maybeSingle()
-
-  if (error) {
-    setPracticeMessage('Database error: ' + error.message)
-    return
-  }
-
-  if (!data) {
-    setPracticeMessage('No practice wallet found for this account.')
-    return
-  }
-
-  const savedBalance = Number(data.balance)
-
-  setPracticeBalance(savedBalance)
-  setPracticeMessage(`Database balance loaded: $${savedBalance.toFixed(2)}`)
-
-  console.log('QUADRA DEBUG:', {
-    account: authData.user.id,
-    databaseBalance: data.balance
-  })
-}
-
 const startPracticeRound = async () => {
   const stake = Number(practiceStake)
 
-  if (!Number.isFinite(stake) || stake <= 0 || stake > practiceBalance) {
-    setPracticeMessage('Enter a valid stake within your practice balance.')
+  if (!Number.isFinite(stake) || stake <= 0 || stake > balance) {
+    setPracticeMessage('Enter a valid stake within your available balance.')
     return
   }
 
   setPracticeBusy(true)
-  setPracticeMessage('Starting practice round...')
+  setPracticeMessage('Starting round...')
   setPracticeResult('')
   setPracticePayout(0)
   setSelectedPracticeTile(null)
@@ -182,7 +144,7 @@ const startPracticeRound = async () => {
     setPracticeMessage(error.message)
   } else {
     setPracticeRoundId(data)
-    setPracticeBalance((current) => Number((current - stake).toFixed(2)))
+    await loadAccountData(userId)
     setPracticeMessage('Round started. Choose one tile.')
   }
 
