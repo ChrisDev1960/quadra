@@ -1161,13 +1161,42 @@ const stopAutoBet = () => {
           )}
 
           {tab === 'referrals' && (
-            <section className="dashboard-panel">
-              <span className="section-label">GROW WITH QUADRA</span>
-              <h2>Your referrals.</h2>
-              <div className="referral-stat"><strong>0</strong><span>People referred</span></div>
-              <p>Your referral link and rewards will appear here when the referral system is connected.</p>
-            </section>
-          )}
+  <section className="dashboard-panel">
+    <span className="section-label">GROW WITH QUADRA</span>
+    <h2>Your referrals.</h2>
+
+    <div className="referral-stat">
+      <strong>0</strong>
+      <span>People referred</span>
+    </div>
+
+    <p>Your unique referral code</p>
+
+    <div className="referral-code-box">
+      <strong>{myReferralCode || 'Loading...'}</strong>
+    </div>
+
+    <p>Your personal referral link</p>
+
+    <input
+      type="text"
+      value={myReferralCode
+        ? `${window.location.origin}/?ref=${myReferralCode}`
+        : ''}
+      readOnly
+    />
+
+    <button
+      className="primary-button"
+      disabled={!myReferralCode}
+      onClick={() => navigator.clipboard.writeText(
+        `${window.location.origin}/?ref=${myReferralCode}`
+      )}
+    >
+      Copy Referral Link
+    </button>
+  </section>
+)}
 
           {tab === 'profile' && (
             <section className="dashboard-panel">
