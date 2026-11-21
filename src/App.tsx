@@ -111,6 +111,7 @@ function App() {
 const [autoRunning, setAutoRunning] = useState(false)
 const [autoMessage, setAutoMessage] = useState('')
 const autoStopRef = useRef(false)
+const minesSectionRef = useRef<HTMLElement | null>(null)
 const [practiceStake, setPracticeStake] = useState('1.00')
 const [practiceRoundId, setPracticeRoundId] = useState('')
 const [practiceBusy, setPracticeBusy] = useState(false)
