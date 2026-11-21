@@ -231,6 +231,8 @@ const loadAccountData = async (id: string) => {
 
     if (walletResult.error) throw walletResult.error
     if (transactionResult.error) throw transactionResult.error
+    if (profileResult.error) throw profileResult.error
+setMyReferralCode(profileResult.data?.referral_code || '')
 
     if (!walletResult.data) {
       setBalance(0)
