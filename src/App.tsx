@@ -673,7 +673,7 @@ const selectPracticeTile = async (tile: number) => {
 
       {selectedPracticeTile === tile && practiceResult && (
         <span className="tile-result-multiplier">
-          {practiceResult === 'won' ? '5.00x' : '0.00x'}
+          {practiceResult === 'won' ? '12.00x' : '0.00x'}
         </span>
       )}
     </button>
@@ -683,7 +683,7 @@ const selectPracticeTile = async (tile: number) => {
 
     <div className="game-controls-preview">
       <label className="control-summary">
-        <span>PRACTICE STAKE (USD)</span>
+        <span>STAKE (USD)</span>
         <input
           type="number"
           min="0.01"
