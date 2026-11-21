@@ -540,6 +540,117 @@ const loadAccountData = async (id: string) => {
     setAutoSettings(prev => ({ ...prev, [key]: value }))
     setAutoSettingsMessage('Settings saved on this device.')
   }
+    
+const startAutoBet = async () => {
+  const stake = Number(autoSettings.stake)
+  const rounds = Number(autoSettings.rounds)
+  const stopProfit = Number(autoSettings.stopProfit)
+  const stopLoss = Number(autoSettings.stopLoss)
+
+  if (autoRunning || practiceRoundId || practiceBusy) return
+
+  if (!Number.isFinite(stake) || stake <= 0 || stake > balance) {
+    setAutoMessage('Enter a valid stake within your balance.')
+    return
+  }
+
+  if (!Number.isInteger(rounds) || rounds < 1 || rounds > 1000) {
+    setAutoMessage('Choose between 1 and 1000 rounds.')
+    return
+  }
+
+  if (stopProfit < 0 || stopLoss < 0) {
+    setAutoMessage('Stop limits cannot be negative.')
+    return
+  }
+
+  autoStopRef.current = false
+  setAutoRunning(true)
+  setAutoMessage('Auto Bet started.')
+
+  let netProfit = 0
+  let completedRounds = 0
+  let currentBalance = balance
+
+  try {
+    for (let i = 0; i < rounds; i++) {
+      if (autoStopRef.current) break
+
+      if (stake > currentBalance) {
+        setAutoMessage('Stopped: insufficient balance.')
+        break
+      }
+
+      setPracticeResult('')
+      setSelectedPracticeTile(null)
+
+      const { data: roundId, error: startError } =
+        await supabase.rpc('start_mines_practice', {
+          p_stake: stake
+        })
+
+      if (startError) throw startError
+
+      setPracticeRoundId(roundId)
+
+      const tile = Math.floor(Math.random() * 4)
+      setSelectedPracticeTile(tile)
+
+      const { data, error } = await supabase.rpc(
+        'select_mines_practice_tile',
+        {
+          p_round_id: roundId,
+          p_selected_tile: tile
+        }
+      )
+
+      if (error) throw error
+
+      const result = Array.isArray(data) ? data[0] : data
+      const won = result.round_status === 'won'
+      const payout = Number(result.payout)
+      const roundProfit = won ? payout - stake : -stake
+
+      netProfit += roundProfit
+      currentBalance += roundProfit
+      completedRounds++
+
+      setPracticeResult(won ? 'won' : 'lost')
+      setPracticePayout(payout)
+      setPracticeRoundId('')
+
+      await loadAccountData(userId)
+
+      setAutoMessage(
+        `Round ${completedRounds}/${rounds}: ${won ? 'Won' : 'Lost'} · Net ${netProfit >= 0 ? '+' : '-'}$${Math.abs(netProfit).toFixed(2)}`
+      )
+
+      if (autoStopRef.current) break
+      if (autoSettings.stopOnWin && won) break
+      if (autoSettings.stopOnLoss && !won) break
+      if (stopProfit > 0 && netProfit >= stopProfit) break
+      if (stopLoss > 0 && netProfit <= -stopLoss) break
+    }
+
+    if (autoStopRef.current) {
+      setAutoMessage(`Stopped manually. ${completedRounds} rounds completed.`)
+    } else if (completedRounds === rounds) {
+      setAutoMessage(`Finished! ${completedRounds} rounds completed.`)
+    }
+  } catch (error) {
+    setAutoMessage(
+      error instanceof Error ? error.message : 'Auto Bet encountered an error.'
+    )
+  } finally {
+    setAutoRunning(false)
+    await loadAccountData(userId)
+  }
+}
+
+const stopAutoBet = () => {
+  autoStopRef.current = true
+  setAutoMessage('Stopping after the current round...')
+}
 
   const navItems: { id: Tab; label: string }[] = [
     { id: 'overview', label: 'Home' },
