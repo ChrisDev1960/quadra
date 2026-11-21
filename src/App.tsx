@@ -234,6 +234,14 @@ const loadAccountData = async (id: string) => {
     if (transactionResult.error) throw transactionResult.error
     if (profileResult.error) throw profileResult.error
 setMyReferralCode(profileResult.data?.referral_code || '')
+    const { count, error: referralCountError } = await supabase
+  .from('referrals')
+  .select('id', { count: 'exact', head: true })
+  .eq('referrer_id', id)
+
+if (!referralCountError) {
+  setReferralCount(count || 0)
+}
 
     if (!walletResult.data) {
       setBalance(0)
