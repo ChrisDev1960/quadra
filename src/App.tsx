@@ -567,6 +567,10 @@ const startAutoBet = async () => {
 
   autoStopRef.current = false
   setAutoRunning(true)
+    minesSectionRef.current?.scrollIntoView({
+  behavior: 'smooth',
+  block: 'start',
+})
   setAutoMessage('Auto Bet started.')
 
   let netProfit = 0
