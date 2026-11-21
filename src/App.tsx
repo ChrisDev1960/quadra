@@ -1182,6 +1182,10 @@ const stopAutoBet = () => {
       <strong>{referralCount}</strong>
       <span>People referred</span>
     </div>
+    <div className="referral-stat">
+  <strong>{depositedReferralCount}</strong>
+  <span>Successful depositors</span>
+</div>
 
     <p>Your unique referral code</p>
 
