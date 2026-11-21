@@ -846,7 +846,7 @@ const stopAutoBet = () => {
       <button
         className="primary-button"
         onClick={startPracticeRound}
-        disabled={practiceBusy || balance <= 0}
+        disabled={practiceBusy || balance <= 0 || autoRunning}
       >
         {practiceBusy ? 'Starting...' : 'Start round'}
       </button>
