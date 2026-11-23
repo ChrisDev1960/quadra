@@ -1113,7 +1113,9 @@ const stopAutoBet = () => {
                 {new Date(transaction.created_at).toLocaleString()}
               </small>
             </div>
-            <strong>{money(transaction.amount)}</strong>
+            <strong style={{ color: transaction.amount < 0 ? '#ef4444' : '#22c55e' }}>
+  {money(transaction.amount)}
+</strong>
           </div>
         ))
       )}
