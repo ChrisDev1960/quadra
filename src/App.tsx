@@ -310,9 +310,10 @@ setReferralRewards(rewardResult.data || [])
       setDeposits(depositResult.data || [])
       setWithdrawals(withdrawalResult.data || [])
       setAdminUsers(userResult.data || [])
-    } catch (error) {
-      setAdminMessage(error instanceof Error ? error.message : 'Unable to load administrator data.')
-    } finally {
+    } catch (error: any) {
+  console.error('Admin data loading error:', error)
+  setAdminMessage(error?.message || 'Unable to load administrator data.')
+} finally {
       setAdminLoading(false)
     }
   }
