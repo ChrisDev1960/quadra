@@ -1249,15 +1249,6 @@ const stopAutoBet = () => {
   {referralCopied ? 'Copied!' : 'Copy Code'}
 </button>
 
-    <button
-      className="primary-button"
-      disabled={!myReferralCode}
-      onClick={() => navigator.clipboard.writeText(
-        `${window.location.origin}/?ref=${myReferralCode}`
-      )}
-    >
-      Copy Referral Link
-    </button>
   </section>
 )}
 
