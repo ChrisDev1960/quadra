@@ -296,7 +296,7 @@ if (!referralStatsError && referralStats) {
   .order('created_at', { ascending: false }).limit(100),
 
 supabase.from('referral_rewards')
-  .select('id,referrer_id,amount,status,created_at')
+  .select('id,referrer_id,referred_id,amount,status,created_at')
   .eq('status', 'pending')
   .order('created_at', { ascending: false })
       ])
