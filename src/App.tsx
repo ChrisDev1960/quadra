@@ -1308,6 +1308,9 @@ const stopAutoBet = () => {
           <button onClick={() => approveReferralReward(item.id)}>
             Approve $2
           </button>
+          <button onClick={() => rejectReferralReward(item.id)}>
+  Reject
+</button>
         </div>
       </div>
     ))
