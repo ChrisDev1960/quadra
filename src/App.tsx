@@ -124,6 +124,7 @@ const [selectedPracticeTile, setSelectedPracticeTile] = useState<number | null>(
   const [email, setEmail] = useState('')
   const [referralCode, setReferralCode] = useState('')
   const [myReferralCode, setMyReferralCode] = useState('')
+  const [referralCopied, setReferralCopied] = useState(false)
   const [referralCount, setReferralCount] = useState(0)
   const [depositedReferralCount, setDepositedReferralCount] = useState(0)
   const [password, setPassword] = useState('')
