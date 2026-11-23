@@ -578,6 +578,26 @@ if (codeToUse) {
     }
   }
 
+  const approveReferralReward = async (rewardId: string) => {
+  setAdminMessage('Approving referral reward...')
+
+  try {
+    const { error } = await supabase.rpc('approve_referral_reward', {
+      p_reward_id: rewardId,
+    })
+
+    if (error) throw error
+
+    setAdminMessage('$2 referral reward approved and credited.')
+    await loadAdminData()
+    await loadAccountData(userId)
+  } catch (error) {
+    setAdminMessage(
+      error instanceof Error ? error.message : 'Reward approval failed.'
+    )
+  }
+}
+
   const logout = async () => {
     await supabase.auth.signOut()
     setLoggedIn(false)
