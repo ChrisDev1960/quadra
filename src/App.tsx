@@ -133,7 +133,7 @@ const [selectedPracticeTile, setSelectedPracticeTile] = useState<number | null>(
 const startPracticeRound = async () => {
   const stake = Number(practiceStake)
 
-  if (!Number.isFinite(stake) || stake <= 0 || stake > balance) {
+  if (!Number.isFinite(stake) || stake <= 0.5 || stake > balance) {
     setPracticeMessage('Enter a valid stake within your available balance.')
     return
   }
@@ -596,7 +596,7 @@ const startAutoBet = async () => {
 
   if (autoRunning || practiceRoundId || practiceBusy) return
 
-  if (!Number.isFinite(stake) || stake <= 0 || stake > balance) {
+  if (!Number.isFinite(stake) || stake <= 0.5 || stake > balance) {
     setAutoMessage('Enter a valid stake within your balance.')
     return
   }
