@@ -83,6 +83,8 @@ function App() {
 
   const [deposits, setDeposits] = useState<Deposit[]>([])
   const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([])
+  const [myDeposits, setMyDeposits] = useState<Deposit[]>([])
+const [myWithdrawals, setMyWithdrawals] = useState<Withdrawal[]>([])
   const [adminUsers, setAdminUsers] = useState<AdminUser[]>([])
   const [referralRewards, setReferralRewards] = useState<any[]>([])
   const [adminLoading, setAdminLoading] = useState(false)
