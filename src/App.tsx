@@ -1233,19 +1233,21 @@ const stopAutoBet = () => {
 
     <p>Your unique referral code</p>
 
-    <div className="referral-code-box">
-      <strong>{myReferralCode || 'Loading...'}</strong>
-    </div>
+<div className="referral-code-box">
+  <strong>{myReferralCode || 'Loading...'}</strong>
+</div>
 
-    <p>Your personal referral link</p>
-
-    <input
-      type="text"
-      value={myReferralCode
-        ? `${window.location.origin}/?ref=${myReferralCode}`
-        : ''}
-      readOnly
-    />
+<button
+  className="primary-button"
+  disabled={!myReferralCode}
+  onClick={async () => {
+    await navigator.clipboard.writeText(myReferralCode)
+    setReferralCopied(true)
+    setTimeout(() => setReferralCopied(false), 2000)
+  }}
+>
+  {referralCopied ? 'Copied!' : 'Copy Code'}
+</button>
 
     <button
       className="primary-button"
