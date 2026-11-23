@@ -292,8 +292,13 @@ if (!referralStatsError && referralStats) {
           .select('id,user_id,amount,network,destination_address,status,admin_note,transaction_hash,created_at')
           .order('created_at', { ascending: false }).limit(100),
         supabase.from('profiles')
-          .select('id,email,created_at')
-          .order('created_at', { ascending: false }).limit(100)
+  .select('id,email,created_at')
+  .order('created_at', { ascending: false }).limit(100),
+
+supabase.from('referral_rewards')
+  .select('id,referrer_id,amount,status,created_at')
+  .eq('status', 'pending')
+  .order('created_at', { ascending: false })
       ])
 
       if (depositResult.error) throw depositResult.error
