@@ -208,7 +208,9 @@ const loadAccountData = async (id: string) => {
   transactionResult,
   profileResult,
   adminResult,
-  activeRoundResult
+  activeRoundResult,
+  myDepositResult,
+  myWithdrawalResult
 ] = await Promise.all([
       supabase.from('wallets')
         .select('balance, currency')
