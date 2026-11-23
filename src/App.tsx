@@ -284,7 +284,7 @@ if (!referralStatsError && referralStats) {
     setAdminMessage('')
 
     try {
-      const [depositResult, withdrawalResult, userResult] = await Promise.all([
+      const [depositResult, withdrawalResult, userResult, rewardResult] = await Promise.all([
         supabase.from('deposit_requests')
           .select('id,user_id,amount,network,payment_reference,status,admin_note,created_at')
           .order('created_at', { ascending: false }).limit(100),
