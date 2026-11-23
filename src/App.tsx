@@ -304,6 +304,8 @@ supabase.from('referral_rewards')
       if (depositResult.error) throw depositResult.error
       if (withdrawalResult.error) throw withdrawalResult.error
       if (userResult.error) throw userResult.error
+      if (rewardResult.error) throw rewardResult.error
+setReferralRewards(rewardResult.data || [])
 
       setDeposits(depositResult.data || [])
       setWithdrawals(withdrawalResult.data || [])
