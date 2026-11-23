@@ -1273,6 +1273,31 @@ const stopAutoBet = () => {
                 <div><span className="section-label">PENDING DEPOSITS</span><h2>{deposits.filter(x => x.status === 'pending').length}</h2></div>
               </div>
 
+                <div className="admin-section">
+  <span className="section-label">REFERRAL REWARDS</span>
+  <h2>Pending $2 rewards</h2>
+
+  {referralRewards.length === 0 ? (
+    <p>No pending referral rewards.</p>
+  ) : (
+    referralRewards.map(item => (
+      <div className="profile-detail admin-record" key={item.id}>
+        <div>
+          <strong>{money(item.amount)} · PENDING</strong>
+          <p>Referrer: {item.referrer_id}</p>
+          <p>Referred account: {item.referred_id}</p>
+          <small>{new Date(item.created_at).toLocaleString()}</small>
+        </div>
+
+        <div className="wallet-actions">
+          <button onClick={() => approveReferralReward(item.id)}>
+            Approve $2
+          </button>
+        </div>
+      </div>
+    ))
+  )}
+</div>
               <div className="admin-section">
                 <span className="section-label">DEPOSIT MANAGEMENT</span>
                 <h2>Incoming deposits</h2>
