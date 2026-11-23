@@ -598,6 +598,20 @@ if (codeToUse) {
     )
   }
 }
+  const rejectReferralReward = async (rewardId: string) => {
+  try {
+    const { error } = await supabase.rpc('reject_referral_reward', {
+      p_reward_id: rewardId,
+    })
+
+    if (error) throw error
+
+    setAdminMessage('Referral reward rejected.')
+    await loadAdminData()
+  } catch (error: any) {
+    setAdminMessage(error.message || 'Reward rejection failed.')
+  }
+}
 
   const logout = async () => {
     await supabase.auth.signOut()
