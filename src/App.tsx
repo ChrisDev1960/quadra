@@ -230,12 +230,24 @@ const loadAccountData = async (id: string) => {
 
       supabase.rpc('is_quadra_admin'),
 
-      supabase.from('mines_practice_rounds')
-        .select('id')
-        .eq('user_id', id)
-        .eq('status', 'active')
-        .maybeSingle()
-    ])
+     supabase.from('mines_practice_rounds')
+  .select('id')
+  .eq('user_id', id)
+  .eq('status', 'active')
+  .maybeSingle(),
+
+supabase.from('deposit_requests')
+  .select('id,user_id,amount,network,payment_reference,status,admin_note,created_at')
+  .eq('user_id', id)
+  .order('created_at', { ascending: false })
+  .limit(20),
+
+supabase.from('withdrawal_requests')
+  .select('id,user_id,amount,network,destination_address,status,admin_note,transaction_hash,created_at')
+  .eq('user_id', id)
+  .order('created_at', { ascending: false })
+  .limit(20)
+])
 
     if (walletResult.error) throw walletResult.error
     if (transactionResult.error) throw transactionResult.error
