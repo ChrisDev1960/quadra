@@ -279,6 +279,8 @@ if (!referralStatsError && referralStats) {
     }
 
     setTransactions(transactionResult.data || [])
+    setMyDeposits(myDepositResult.data || [])
+setMyWithdrawals(myWithdrawalResult.data || [])
     setIsAdmin(adminResult.data === true)
 
     if (activeRoundResult.error) {
