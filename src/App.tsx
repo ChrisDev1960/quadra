@@ -252,6 +252,11 @@ supabase.from('withdrawal_requests')
     if (walletResult.error) throw walletResult.error
     if (transactionResult.error) throw transactionResult.error
     if (profileResult.error) throw profileResult.error
+    if (myDepositResult.error) throw myDepositResult.error
+if (myWithdrawalResult.error) throw myWithdrawalResult.error
+
+setMyDeposits(myDepositResult.data || [])
+setMyWithdrawals(myWithdrawalResult.data || [])
 setMyReferralCode(profileResult.data?.referral_code || '')
     const { data: referralStats, error: referralStatsError } =
   await supabase.rpc('get_referral_stats')
