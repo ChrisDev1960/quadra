@@ -1449,7 +1449,11 @@ onChange={e => setAdminNotes(prev => ({ ...prev, [item.id]: e.target.value }))}
                     <div className="admin-record-actions">
                       {item.status === 'pending' && (
                         <>
-                          <input placeholder="Optional admin note" value={adminNote} onChange={e => setAdminNote(e.target.value)} />
+                          <input
+  placeholder="Optional admin note"
+  value={adminNotes[item.id] || ''}
+  onChange={e => setAdminNotes(prev => ({ ...prev, [item.id]: e.target.value }))}
+/>
                           <div className="wallet-actions">
                             <button onClick={() => adminAction('approve_withdrawal', item.id, adminNote)}>Approve request</button>
                             <button onClick={() => adminAction('reject_withdrawal', item.id, adminNote)}>Reject + refund</button>
