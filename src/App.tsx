@@ -1390,11 +1390,18 @@ const stopAutoBet = () => {
                       {item.admin_note && <p>Admin note: {item.admin_note}</p>}
                     </div>
                     {item.status === 'pending' && (
-                      <div className="wallet-actions">
-                        <button onClick={() => adminAction('approve_deposit', item.id, adminNote)}>Approve</button>
-                        <button onClick={() => adminAction('reject_deposit', item.id, adminNote)}>Reject</button>
-                      </div>
-                    )}
+  <>
+    <input
+      placeholder="Reason for rejection"
+      value={adminNote}
+      onChange={e => setAdminNote(e.target.value)}
+    />
+    <div className="wallet-actions">
+      <button onClick={() => adminAction('approve_deposit', item.id, adminNote)}>Approve</button>
+      <button onClick={() => adminAction('reject_deposit', item.id, adminNote)}>Reject</button>
+    </div>
+  </>
+)}
                   </div>
                 ))}
               </div>
