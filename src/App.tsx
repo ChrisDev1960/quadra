@@ -614,7 +614,7 @@ if (codeToUse) {
     if (error) throw error
 
     setAdminMessage('Action completed successfully.')
-    setAdminNote('')
+    setAdminNotes(prev => ({ ...prev, [requestId]: '' }))
     setPayoutHashes(prev => ({ ...prev, [requestId]: '' }))
 
     await loadAdminData()
