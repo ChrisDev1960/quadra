@@ -1224,23 +1224,64 @@ const stopAutoBet = () => {
           )}
 
           {tab === 'activity' && (
-            <section className="dashboard-panel">
-              <span className="section-label">ACCOUNT RECORDS</span>
-              <h2>Recent activity.</h2>
-              {transactions.length === 0 ? (
-                <div className="empty-state"><span>—</span><strong>No transactions yet</strong><p>Your financial transaction history will appear here.</p></div>
-              ) : transactions.map(transaction => (
-                <div className="profile-detail" key={transaction.id}>
-                  <div>
-                    <strong>{transaction.type.replace('_', ' ')}</strong>
-                    <p>{transaction.description || transaction.status}</p>
-                    <small>{new Date(transaction.created_at).toLocaleString()}</small>
-                  </div>
-                  <strong>{money(transaction.amount)}</strong>
-                </div>
-              ))}
-            </section>
+  <section className="dashboard-panel">
+    <span className="section-label">ACCOUNT RECORDS</span>
+    <h2>Recent activity.</h2>
+
+    {transactions.length === 0 ? (
+      <div className="empty-state">
+        <span>—</span>
+        <strong>No transactions yet</strong>
+        <p>Your financial transaction history will appear here.</p>
+      </div>
+    ) : transactions.map(transaction => (
+      <div className="profile-detail" key={transaction.id}>
+        <div>
+          <strong>{transaction.type.replace('_', ' ')}</strong>
+          <p>{transaction.description || transaction.status}</p>
+          <small>{new Date(transaction.created_at).toLocaleString()}</small>
+        </div>
+        <strong>{money(transaction.amount)}</strong>
+      </div>
+    ))}
+
+    <h2>Deposit requests.</h2>
+
+    {myDeposits.length === 0 ? (
+      <p>No deposit requests yet.</p>
+    ) : myDeposits.map(item => (
+      <div className="profile-detail" key={item.id}>
+        <div>
+          <strong>Deposit — {item.status}</strong>
+          <p>{item.network || 'Deposit request'}</p>
+          <small>{new Date(item.created_at).toLocaleString()}</small>
+          {item.admin_note && (
+            <p><strong>Admin message:</strong> {item.admin_note}</p>
           )}
+        </div>
+        <strong>{money(item.amount)}</strong>
+      </div>
+    ))}
+
+    <h2>Withdrawal requests.</h2>
+
+    {myWithdrawals.length === 0 ? (
+      <p>No withdrawal requests yet.</p>
+    ) : myWithdrawals.map(item => (
+      <div className="profile-detail" key={item.id}>
+        <div>
+          <strong>Withdrawal — {item.status}</strong>
+          <p>{item.network}</p>
+          <small>{new Date(item.created_at).toLocaleString()}</small>
+          {item.admin_note && (
+            <p><strong>Admin message:</strong> {item.admin_note}</p>
+          )}
+        </div>
+        <strong>{money(item.amount)}</strong>
+      </div>
+    ))}
+  </section>
+)}
 
           {tab === 'referrals' && (
   <section className="dashboard-panel">
