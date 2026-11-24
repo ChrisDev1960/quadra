@@ -578,31 +578,56 @@ if (codeToUse) {
     }
   }
 
-  const adminAction = async (rpcName: string, requestId: string, note?: string, hash?: string) => {
-    setAdminMessage('Processing administrator action...')
+ const adminAction = async (
+  rpcName: string,
+  requestId: string,
+  note?: string,
+  hash?: string
+) => {
+  setAdminMessage('Processing administrator action...')
 
-    try {
-      const args: Record<string, string> = { p_request_id: requestId }
+  try {
+    const args: Record<string, string> = {
+      p_request_id: requestId
+    }
 
-      if (rpcName === 'mark_withdrawal_paid') {
-        args.p_transaction_hash = hash || ''
-      } else {
-        args.p_admin_note = note || ''
+    if (
+      rpcName === 'reject_deposit' ||
+      rpcName === 'reject_withdrawal'
+    ) {
+      const reason = note?.trim()
+
+      if (!reason) {
+        setAdminMessage('Enter a rejection reason before rejecting.')
+        return
       }
 
-      const { error } = await supabase.rpc(rpcName, args)
-      if (error) throw error
-
-      setAdminMessage('Action completed successfully.')
-      setAdminNote('')
-      setPayoutHashes(prev => ({ ...prev, [requestId]: '' }))
-      await loadAdminData()
-      await loadAccountData(userId)
-    } catch (error) {
-      setAdminMessage(error instanceof Error ? error.message : 'Administrator action failed.')
+      args.p_admin_note = reason
+    } else if (rpcName === 'mark_withdrawal_paid') {
+      args.p_transaction_hash = hash || ''
+    } else {
+      args.p_admin_note = note || ''
     }
-  }
 
+    const { error } = await supabase.rpc(rpcName, args)
+
+    if (error) throw error
+
+    setAdminMessage('Action completed successfully.')
+    setAdminNote('')
+    setPayoutHashes(prev => ({ ...prev, [requestId]: '' }))
+
+    await loadAdminData()
+    await loadAccountData(userId)
+
+  } catch (error) {
+    setAdminMessage(
+      error instanceof Error
+        ? error.message
+        : 'Administrator action failed.'
+    )
+  }
+}
   const approveReferralReward = async (rewardId: string) => {
   setAdminMessage('Approving referral reward...')
 
