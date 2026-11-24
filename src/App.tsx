@@ -1455,8 +1455,8 @@ onChange={e => setAdminNotes(prev => ({ ...prev, [item.id]: e.target.value }))}
   onChange={e => setAdminNotes(prev => ({ ...prev, [item.id]: e.target.value }))}
 />
                           <div className="wallet-actions">
-                            <button onClick={() => adminAction('approve_withdrawal', item.id, adminNote)}>Approve request</button>
-                            <button onClick={() => adminAction('reject_withdrawal', item.id, adminNote)}>Reject + refund</button>
+                            <button onClick={() => adminAction('approve_withdrawal', item.id, adminNotes[item.id] || '')}>Approve request</button>
+<button onClick={() => adminAction('reject_withdrawal', item.id, adminNotes[item.id] || '')}>Reject + refund</button>
                           </div>
                         </>
                       )}
