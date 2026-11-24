@@ -1418,8 +1418,8 @@ const stopAutoBet = () => {
   <>
     <input
       placeholder="Reason for rejection"
-      value={adminNote}
-      onChange={e => setAdminNote(e.target.value)}
+      value={adminNotes[item.id] || ''}
+onChange={e => setAdminNotes(prev => ({ ...prev, [item.id]: e.target.value }))}
     />
     <div className="wallet-actions">
       <button onClick={() => adminAction('approve_deposit', item.id, adminNote)}>Approve</button>
