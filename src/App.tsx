@@ -89,7 +89,7 @@ const [myWithdrawals, setMyWithdrawals] = useState<Withdrawal[]>([])
   const [referralRewards, setReferralRewards] = useState<any[]>([])
   const [adminLoading, setAdminLoading] = useState(false)
   const [adminMessage, setAdminMessage] = useState('')
-  const [adminNote, setAdminNote] = useState('')
+  const [adminNotes, setAdminNotes] = useState<Record<string, string>>({})
   const [payoutHashes, setPayoutHashes] = useState<Record<string, string>>({})
 
   const [depositAmount, setDepositAmount] = useState('')
