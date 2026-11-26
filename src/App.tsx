@@ -66,9 +66,17 @@ const defaultAutoSettings: AutoSettings = {
 }
 
 function App() {
-  const [mode, setMode] = useState<AuthMode>('home')
+    const [mode, setMode] = useState<AuthMode>('home')
   const [tab, setTab] = useState<Tab>('overview')
   const [walletPage, setWalletPage] = useState<WalletPage>('main')
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    return localStorage.getItem('quadra-theme') === 'dark' ? 'dark' : 'light'
+  })
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme)
+    localStorage.setItem('quadra-theme', theme)
+  }, [theme])
 
   const [userEmail, setUserEmail] = useState('')
   const [userId, setUserId] = useState('')
