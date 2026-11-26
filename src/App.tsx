@@ -518,7 +518,7 @@ if (codeToUse) {
 
     try {
       const amount = Number(depositAmount)
-      if (!Number.isFinite(amount) || amount <= 0) throw new Error('Enter a valid deposit amount.')
+      if (!Number.isFinite(amount) || amount < 1.8) throw new Error('Minimum deposit is $1.80.')
 
       const hash = depositReference.trim()
       if (!/^0x[a-fA-F0-9]{64}$/.test(hash)) {
