@@ -1207,7 +1207,7 @@ const stopAutoBet = () => {
                 <div className="notice">Use only the network selected above. Ethereum ERC20 and BNB Smart Chain BEP20 are different networks. Sending through the wrong network may result in loss of funds.</div>
 
                 <label htmlFor="deposit-amount">Amount in USD</label>
-                <input id="deposit-amount" type="number" min="0.01" step="0.01" value={depositAmount} onChange={e => setDepositAmount(e.target.value)} required />
+                <input id="deposit-amount" type="number" min="1.80" step="0.01" value={depositAmount} onChange={e => setDepositAmount(e.target.value)} required />
 
                 <label htmlFor="deposit-hash">Transaction hash</label>
                 <input id="deposit-hash" value={depositReference} onChange={e => setDepositReference(e.target.value)} placeholder="0x..." required />
