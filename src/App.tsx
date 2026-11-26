@@ -569,10 +569,10 @@ if (codeToUse) {
       })
       if (error) throw error
 
-      setWalletMessage('Withdrawal request submitted. Your funds are reserved while the request is reviewed.')
       setWithdrawalAmount('')
-      setWithdrawalAddress('')
-      await loadAccountData(userId)
+setWithdrawalAddress('')
+await loadAccountData(userId)
+setWalletMessage('Withdrawal request submitted. Your funds are reserved while the request is reviewed.')
     } catch (error) {
       setWalletMessage(error instanceof Error ? error.message : 'Withdrawal request failed.')
     } finally {
