@@ -1234,34 +1234,49 @@ const stopAutoBet = () => {
 )}
 
           {tab === 'wallet' && walletPage === 'withdraw' && (
-            <section className="dashboard-panel">
-              <button className="text-action" onClick={() => openWalletPage('main')}>Back to Wallet</button>
-              <span className="section-label">YOUR WALLET</span>
-              <h2>Withdraw.</h2>
-              <p>Choose your preferred network and enter your receiving wallet address. Your requested amount will be reserved while your request is reviewed.</p>
+  <section className="dashboard-panel">
+    {walletMessage === 'Withdrawal request submitted. Your funds are reserved while the request is reviewed.' ? (
+      <>
+        <h2>Request sent!</h2>
+        <div className="notice" role="status">
+          Your withdrawal request has been submitted successfully. Your funds are reserved while it is being reviewed.
+        </div>
+        <button className="primary-button" onClick={() => openWalletPage('main')}>
+          Back to Wallet
+        </button>
+      </>
+    ) : (
+      <>
+        <button className="text-action" onClick={() => openWalletPage('main')}>Back to Wallet</button>
+        <span className="section-label">YOUR WALLET</span>
+        <h2>Withdraw.</h2>
+        <p>Choose your preferred network and enter your receiving wallet address. Your requested amount will be reserved while your request is reviewed.</p>
 
-              {walletMessage && <div className="notice" role="status">{walletMessage}</div>}
+        {walletMessage && <div className="notice" role="status">{walletMessage}</div>}
 
-              <form onSubmit={submitWithdrawal}>
-                <label htmlFor="withdrawal-network">Withdrawal network</label>
-                <select id="withdrawal-network" value={withdrawalNetwork} onChange={e => setWithdrawalNetwork(e.target.value)} required>
-                  <option value="Ethereum (ERC20)">Ethereum (ERC20)</option>
-                  <option value="BNB Smart Chain (BEP20)">BNB Smart Chain (BEP20)</option>
-                </select>
+        <form onSubmit={submitWithdrawal}>
+          <label htmlFor="withdrawal-network">Withdrawal network</label>
+          <select id="withdrawal-network" value={withdrawalNetwork} onChange={e => setWithdrawalNetwork(e.target.value)} required>
+            <option value="Ethereum (ERC20)">Ethereum (ERC20)</option>
+            <option value="BNB Smart Chain (BEP20)">BNB Smart Chain (BEP20)</option>
+          </select>
 
-                <label htmlFor="withdrawal-amount">Amount in USD</label>
-               <input id="withdrawal-amount" type="number" min="12.00" step="0.01" value={withdrawalAmount} onChange={e => setWithdrawalAmount(e.target.value)} required />
-                <label htmlFor="withdrawal-address">Your receiving wallet address</label>
-                <input id="withdrawal-address" value={withdrawalAddress} onChange={e => setWithdrawalAddress(e.target.value)} placeholder="0x..." required />
+          <label htmlFor="withdrawal-amount">Amount in USD</label>
+          <input id="withdrawal-amount" type="number" min="12.00" step="0.01" value={withdrawalAmount} onChange={e => setWithdrawalAmount(e.target.value)} required />
 
-                <div className="notice">Ethereum ERC20 and BNB Smart Chain BEP20 are different networks. Make sure your receiving wallet supports the selected network.</div>
+          <label htmlFor="withdrawal-address">Your receiving wallet address</label>
+          <input id="withdrawal-address" value={withdrawalAddress} onChange={e => setWithdrawalAddress(e.target.value)} placeholder="0x..." required />
 
-                <button className="primary-button" disabled={walletActionLoading}>
-                  {walletActionLoading ? 'Submitting...' : 'Submit withdrawal request'}
-                </button>
-              </form>
-            </section>
-          )}
+          <div className="notice">Ethereum ERC20 and BNB Smart Chain BEP20 are different networks. Make sure your receiving wallet supports the selected network.</div>
+
+          <button className="primary-button" disabled={walletActionLoading}>
+            {walletActionLoading ? 'Submitting...' : 'Submit withdrawal request'}
+          </button>
+        </form>
+      </>
+    )}
+  </section>
+)}
 
           {tab === 'activity' && (
   <section className="dashboard-panel">
