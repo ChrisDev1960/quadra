@@ -1554,6 +1554,13 @@ onChange={e => setAdminNotes(prev => ({ ...prev, [item.id]: e.target.value }))}
         <a className="brand" href="#" onClick={e => { e.preventDefault(); resetForm('home') }}>QUADRA<span>.</span></a>
         <nav><a href="#experience">Experience</a><a href="#about">About</a></nav>
         <div className="nav-actions">
+                    <button
+            className="theme-toggle"
+            type="button"
+            onClick={() => setTheme(current => current === 'dark' ? 'light' : 'dark')}
+          >
+            {theme === 'dark' ? '☀ Light' : '☾ Dark'}
+          </button>
           <button className="login-button" onClick={() => resetForm('login')}>Log in</button>
           <button className="nav-button" onClick={() => resetForm('signup')}>Create account</button>
         </div>
