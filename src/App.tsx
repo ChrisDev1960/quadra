@@ -1470,7 +1470,12 @@ onChange={e => setAdminNotes(prev => ({ ...prev, [item.id]: e.target.value }))}
                             disabled={!/^0x[a-fA-F0-9]{64}$/.test(payoutHashes[item.id]?.trim() || '')}>
                             Confirm sent · Mark paid
                           </button>
-                          <button onClick={() => adminAction('reject_withdrawal', item.id, adminNote)}>Reject + refund</button>
+                          <input
+  placeholder="Reason for rejection"
+  value={adminNotes[item.id] || ''}
+  onChange={e => setAdminNotes(prev => ({ ...prev, [item.id]: e.target.value }))}
+/>
+<button onClick={() => adminAction('reject_withdrawal', item.id, adminNotes[item.id] || '')}>Reject + refund</button>
                         </>
                       )}
                     </div>
