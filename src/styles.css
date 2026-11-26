@@ -2019,3 +2019,79 @@ textarea:focus-visible {
     font-size: 16px !important;
   }
 }
+/* QUADRA THEME SWITCH */
+.theme-toggle {
+  padding: 11px 15px;
+  border-radius: 30px;
+  background: transparent;
+  color: var(--charcoal);
+  border: 1px solid var(--line);
+  font-size: 12px;
+  font-weight: 700;
+  transition: .2s ease;
+}
+
+.theme-toggle:hover {
+  transform: translateY(-2px);
+}
+
+/* QUADRA DARK CASINO THEME */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --ash: #090F0C;
+  --ash-deep: #101A14;
+  --surface: #111C16;
+  --surface-bright: #17251C;
+  --surface-raised: #1B2B20;
+
+  --charcoal: #F1F5EF;
+  --muted: #A0B0A3;
+
+  --sage: #176B43;
+  --sage-deep: #21A366;
+  --olive: #A9B88D;
+  --gold: #D6B56F;
+
+  --line: rgba(211, 230, 215, .12);
+
+  --shadow-soft: 0 10px 28px rgba(0, 0, 0, .25);
+  --shadow-raised: 0 15px 35px rgba(0, 0, 0, .35);
+  --shadow-inset: inset 0 1px 0 rgba(255,255,255,.05);
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+  background: var(--ash);
+}
+
+html[data-theme="dark"] body {
+  background:
+    radial-gradient(ellipse at 12% 0%, rgba(22, 112, 65, .16), transparent 40%),
+    linear-gradient(145deg, #090F0C, #101A14 65%, #0B120E);
+  color: var(--charcoal);
+}
+
+html[data-theme="dark"] .theme-toggle {
+  color: #E5C77F;
+  border-color: rgba(214, 181, 111, .35);
+  background: rgba(214, 181, 111, .08);
+}
+
+html[data-theme="dark"] .nav-button,
+html[data-theme="dark"] .primary-button {
+  background: linear-gradient(145deg, #16834E, #0C5633);
+  box-shadow:
+    0 7px 0 #073C24,
+    0 12px 23px rgba(0,0,0,.3),
+    inset 0 1px 0 rgba(255,255,255,.15);
+}
+
+html[data-theme="dark"] .nav-button span,
+html[data-theme="dark"] .primary-button span {
+  color: #F0D18A;
+}
+
+html[data-theme="dark"] .login-button:hover {
+  background: rgba(255,255,255,.08);
+}
