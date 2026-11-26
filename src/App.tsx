@@ -1181,43 +1181,57 @@ const stopAutoBet = () => {
   </section>
 )}
           {tab === 'wallet' && walletPage === 'deposit' && (
-            <section className="dashboard-panel">
-              <button className="text-action" onClick={() => openWalletPage('main')}>Back to Wallet</button>
-              <span className="section-label">YOUR WALLET</span>
-              <h2>Deposit.</h2>
-              <p>Send USDT to the QUADRA address below using the selected network. Submit the request only after the transfer is complete.</p>
+  <section className="dashboard-panel">
+    {walletMessage === 'Deposit request submitted. It is awaiting administrator verification.' ? (
+      <>
+        <h2>Request sent!</h2>
+        <div className="notice" role="status">
+          Your deposit request has been submitted successfully. Please wait for administrator verification.
+        </div>
+        <button className="primary-button" onClick={() => openWalletPage('main')}>
+          Back to Wallet
+        </button>
+      </>
+    ) : (
+      <>
+        <button className="text-action" onClick={() => openWalletPage('main')}>Back to Wallet</button>
+        <span className="section-label">YOUR WALLET</span>
+        <h2>Deposit.</h2>
+        <p>Send USDT to the QUADRA address below using the selected network. Submit the request only after the transfer is complete.</p>
 
-              {walletMessage && <div className="notice" role="status">{walletMessage}</div>}
+        {walletMessage && <div className="notice" role="status">{walletMessage}</div>}
 
-              <form onSubmit={submitDeposit}>
-                <label htmlFor="deposit-network">Choose deposit network</label>
-                <select id="deposit-network" value={depositNetwork} onChange={e => setDepositNetwork(e.target.value)} required>
-                  <option value="Ethereum (ERC20)">Ethereum (ERC20)</option>
-                  <option value="BNB Smart Chain (BEP20)">BNB Smart Chain (BEP20)</option>
-                </select>
+        <form onSubmit={submitDeposit}>
+          <label htmlFor="deposit-network">Choose deposit network</label>
+          <select id="deposit-network" value={depositNetwork} onChange={e => setDepositNetwork(e.target.value)} required>
+            <option value="Ethereum (ERC20)">Ethereum (ERC20)</option>
+            <option value="BNB Smart Chain (BEP20)">BNB Smart Chain (BEP20)</option>
+          </select>
 
-                <label>Official QUADRA USDT deposit address</label>
-                <div className="address-copy-row">
-                  <strong>{QUADRA_DEPOSIT_ADDRESS}</strong>
-                  <button type="button" className="secondary-button" onClick={copyDepositAddress}>Copy address</button>
-                </div>
+          <label>Official QUADRA USDT deposit address</label>
+          <div className="address-copy-row">
+            <strong>{QUADRA_DEPOSIT_ADDRESS}</strong>
+            <button type="button" className="secondary-button" onClick={copyDepositAddress}>Copy address</button>
+          </div>
 
-                {depositCopyMessage && <p role="status">{depositCopyMessage}</p>}
+          {depositCopyMessage && <p role="status">{depositCopyMessage}</p>}
 
-                <div className="notice">Use only the network selected above. Ethereum ERC20 and BNB Smart Chain BEP20 are different networks. Sending through the wrong network may result in loss of funds.</div>
+          <div className="notice">Use only the network selected above. Ethereum ERC20 and BNB Smart Chain BEP20 are different networks. Sending through the wrong network may result in loss of funds.</div>
 
-                <label htmlFor="deposit-amount">Amount in USD</label>
-                <input id="deposit-amount" type="number" min="1.80" step="0.01" value={depositAmount} onChange={e => setDepositAmount(e.target.value)} required />
+          <label htmlFor="deposit-amount">Amount in USD</label>
+          <input id="deposit-amount" type="number" min="1.80" step="0.01" value={depositAmount} onChange={e => setDepositAmount(e.target.value)} required />
 
-                <label htmlFor="deposit-hash">Transaction hash</label>
-                <input id="deposit-hash" value={depositReference} onChange={e => setDepositReference(e.target.value)} placeholder="0x..." required />
+          <label htmlFor="deposit-hash">Transaction hash</label>
+          <input id="deposit-hash" value={depositReference} onChange={e => setDepositReference(e.target.value)} placeholder="0x..." required />
 
-                <button className="primary-button" disabled={walletActionLoading}>
-                  {walletActionLoading ? 'Submitting...' : 'Submit deposit request'}
-                </button>
-              </form>
-            </section>
-          )}
+          <button className="primary-button" disabled={walletActionLoading}>
+            {walletActionLoading ? 'Submitting...' : 'Submit deposit request'}
+          </button>
+        </form>
+      </>
+    )}
+  </section>
+)}
 
           {tab === 'wallet' && walletPage === 'withdraw' && (
             <section className="dashboard-panel">
