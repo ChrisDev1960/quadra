@@ -1236,8 +1236,7 @@ const stopAutoBet = () => {
                 </select>
 
                 <label htmlFor="withdrawal-amount">Amount in USD</label>
-                <input id="withdrawal-amount" type="number" min="0.01" step="0.01" value={withdrawalAmount} onChange={e => setWithdrawalAmount(e.target.value)} required />
-
+               <input id="withdrawal-amount" type="number" min="12.00" step="0.01" value={withdrawalAmount} onChange={e => setWithdrawalAmount(e.target.value)} required />
                 <label htmlFor="withdrawal-address">Your receiving wallet address</label>
                 <input id="withdrawal-address" value={withdrawalAddress} onChange={e => setWithdrawalAddress(e.target.value)} placeholder="0x..." required />
 
