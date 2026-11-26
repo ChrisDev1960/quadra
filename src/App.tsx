@@ -131,6 +131,8 @@ const [selectedPracticeTile, setSelectedPracticeTile] = useState<number | null>(
   const [depositedReferralCount, setDepositedReferralCount] = useState(0)
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -1536,7 +1538,7 @@ onChange={e => setAdminNotes(prev => ({ ...prev, [item.id]: e.target.value }))}
 
               {mode !== 'forgot' && <>
                 <label htmlFor="password">Password</label>
-                <input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="At least 8 characters" autoComplete={mode === 'login' ? 'current-password' : 'new-password'} minLength={8} required />
+                <input id="password" type={showPassword ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} placeholder="At least 8 characters" autoComplete={mode === 'login' ? 'current-password' : 'new-password'} minLength={8} required />
               </>}
 
               {mode === 'signup' && <>
