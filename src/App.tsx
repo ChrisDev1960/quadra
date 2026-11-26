@@ -553,7 +553,7 @@ if (codeToUse) {
 
     try {
       const amount = Number(withdrawalAmount)
-      if (!Number.isFinite(amount) || amount <= 0) throw new Error('Enter a valid withdrawal amount.')
+      if (!Number.isFinite(amount) || amount < 12) throw new Error('Minimum withdrawal is $12.00.')
 
       const address = withdrawalAddress.trim()
       if (!/^0x[a-fA-F0-9]{40}$/.test(address)) {
